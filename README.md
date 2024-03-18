@@ -1,0 +1,1 @@
+"Death Note" (https://skfb.ly/6VtsU) by CG.oum is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
