@@ -1,6 +1,6 @@
 ﻿using BepInEx;
-using DeathNote;
-using static DeathNote.DeathNoteBase;
+using DeathNoteMod;
+using static DeathNoteMod.DeathNoteBase;
 using GameNetcodeStuff;
 using HarmonyLib;
 using UnityEngine;
@@ -48,13 +48,13 @@ using System;
                         PluginInstance.SendChatMessage("Cannot restart, ship must be in orbit.");
                         return false;
                     }
-                    Plugin.AcceptRestart(manager);
+                    PluginInstance.AcceptRestart(manager);
                     return false;
                 }
                 if (text == "DENY")
                 {
                     ResetTextbox(__instance, local);
-                    Plugin.DeclineRestart();
+                    PluginInstance.DeclineRestart();
                     return false;
                 }
                 return true;
@@ -64,21 +64,21 @@ using System;
                 ResetTextbox(__instance, local);
                 if (!GameNetworkManager.Instance.isHostingGame)
                 {
-                    Plugin.SendChatMessage("Only the host can restart.");
+                    PluginInstance.SendChatMessage("Only the host can restart.");
                     return false;
                 }
                 if (!local.isInHangarShipRoom || !manager.inShipPhase || manager.travellingToNewLevel)
                 {
-                    Plugin.SendChatMessage("Cannot restart, ship must be in orbit.");
+                    PluginInstance.SendChatMessage("Cannot restart, ship must be in orbit.");
                     return false;
                 }
-                if (Plugin.bypassConfirm)
+                if (PluginInstance.bypassConfirm)
                 {
-                    Plugin.AcceptRestart(manager);
+                    PluginInstance.AcceptRestart(manager);
                 }
                 else
                 {
-                    Plugin.ConfirmRestart();
+                    PluginInstance.ConfirmRestart();
                 }
                 return false;
             }

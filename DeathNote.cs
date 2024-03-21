@@ -3,16 +3,20 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
+using static LethalLib.Modules.ContentLoader;
 
-namespace DeathNote
+namespace DeathNoteMod
 {
     [BepInPlugin(modGUID, modName, modVersion)]
     public class DeathNoteBase : BaseUnityPlugin
     {
-        private const string modGUID = "Snowlance.DeathNote";
-        private const string modName = "DeathNote";
+        private const string modGUID = "Snowlance.DeathNoteMod";
+        private const string modName = "DeathNoteMod";
         private const string modVersion = "0.1.0";
+
+        public static AssetBundle DNAssetBundle;
 
         public static DeathNoteBase PluginInstance { get; private set; } = null!;
         public static ManualLogSource LoggerInstance { get; private set; }
@@ -27,6 +31,21 @@ namespace DeathNote
                 PluginInstance = this;
             }
 
+            string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            DNAssetBundle = AssetBundle.LoadFromFile(Path.Combine(sAssemblyLocation, "DNAssetBundle/DNAssetBundle"));
+            if (DNAssetBundle == null)
+            {
+                LoggerInstance.LogError("Failed to load custom assets."); // ManualLogSource for your plugin
+                return;
+            }
+
+            int iRarity = 10;
+            Item DeathNote = DNAssetBundle.LoadAsset<Item>("directory/to/itemdataasset.asset");
+            LethalLib.Modules.Utilities.FixMixerGroups(DeathNote.spawnPrefab);
+            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
+            LethalLib.Modules.Items.RegisterScrap(DeathNote, iRarity, LethalLib.Modules.Levels.LevelTypes.All);
+
             LoggerInstance = PluginInstance.Logger;
             LoggerInstance.LogDebug($"Plugin {modName} loaded successfully.");
 
@@ -35,6 +54,7 @@ namespace DeathNote
             harmony.PatchAll();
 
             LoggerInstance.LogInfo($"{modGUID} v{modVersion} has loaded!");
+            
         }
     }
 }
