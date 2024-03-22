@@ -10,10 +10,11 @@ using static LethalLib.Modules.ContentLoader;
 namespace DeathNoteMod
 {
     [BepInPlugin(modGUID, modName, modVersion)]
+    [BepInDependency(LethalLib.Plugin.ModGUID)]
     public class DeathNoteBase : BaseUnityPlugin
     {
-        private const string modGUID = "Snowlance.DeathNoteMod";
-        private const string modName = "DeathNoteMod";
+        private const string modGUID = "Snowlance.DeathNote";
+        private const string modName = "DeathNote";
         private const string modVersion = "0.1.0";
 
         public static AssetBundle DNAssetBundle;
@@ -31,30 +32,37 @@ namespace DeathNoteMod
                 PluginInstance = this;
             }
 
+            LoggerInstance = PluginInstance.Logger;
+            LoggerInstance.LogDebug($"Plugin {modName} loaded successfully.");
+
+            // Loading assets
             string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             DNAssetBundle = AssetBundle.LoadFromFile(Path.Combine(sAssemblyLocation, "DNAssetBundle/DNAssetBundle"));
+            LoggerInstance.LogDebug($"Got DNAssetBundle at: {Path.Combine(sAssemblyLocation, "DNAssetBundle/DNAssetBundle")}");
             if (DNAssetBundle == null)
             {
                 LoggerInstance.LogError("Failed to load custom assets."); // ManualLogSource for your plugin
                 return;
             }
 
+            // Registering item
             int iRarity = 10;
-            Item DeathNote = DNAssetBundle.LoadAsset<Item>("directory/to/itemdataasset.asset");
-            LethalLib.Modules.Utilities.FixMixerGroups(DeathNote.spawnPrefab);
+            LoggerInstance.LogDebug("Getting item");
+            Item DeathNote = DNAssetBundle.LoadAsset<Item>("death_note.prefab"); // TODO: LOAD PROPER ASSET HERE, NEED PATHING TO THE PREFAB OR death_note.asset file
+            LoggerInstance.LogDebug("pass1");
+            LethalLib.Modules.Utilities.FixMixerGroups(DeathNote.spawnPrefab); // TODO: CRASHING HERE
+            LoggerInstance.LogDebug("pass2");
             LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
+            LoggerInstance.LogDebug("pass3");
             LethalLib.Modules.Items.RegisterScrap(DeathNote, iRarity, LethalLib.Modules.Levels.LevelTypes.All);
+            LoggerInstance.LogDebug("pass4");
 
-            LoggerInstance = PluginInstance.Logger;
-            LoggerInstance.LogDebug($"Plugin {modName} loaded successfully.");
-
-            configVolume = Config.Bind("Volume", "MusicVolume", 1f, "Volume of the music. Must be between 0 and 1.");
+            //configVolume = Config.Bind("Volume", "MusicVolume", 1f, "Volume of the music. Must be between 0 and 1.");
 
             harmony.PatchAll();
 
             LoggerInstance.LogInfo($"{modGUID} v{modVersion} has loaded!");
-            
         }
     }
 }
