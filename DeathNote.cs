@@ -49,7 +49,11 @@ namespace DeathNoteMod
             // Registering item
             int iRarity = 10;
             LoggerInstance.LogDebug("Getting item");
-            Item DeathNote = DNAssetBundle.LoadAsset<Item>("death_note.prefab"); // TODO: LOAD PROPER ASSET HERE, NEED PATHING TO THE PREFAB OR death_note.asset file
+            Item DeathNote = DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNotePrefab.prefab"); // TODO: LOAD PROPER ASSET HERE, NEED PATHING TO THE PREFAB OR death_note.asset file
+            if (DeathNote == null)
+            {
+                LoggerInstance.LogError("DeathNote Item not found...");
+            }
             LoggerInstance.LogDebug("pass1");
             LethalLib.Modules.Utilities.FixMixerGroups(DeathNote.spawnPrefab); // TODO: CRASHING HERE
             LoggerInstance.LogDebug("pass2");
@@ -61,7 +65,7 @@ namespace DeathNoteMod
             //configVolume = Config.Bind("Volume", "MusicVolume", 1f, "Volume of the music. Must be between 0 and 1.");
 
             harmony.PatchAll();
-
+            
             LoggerInstance.LogInfo($"{modGUID} v{modVersion} has loaded!");
         }
     }
