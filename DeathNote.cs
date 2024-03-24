@@ -5,7 +5,8 @@ using HarmonyLib;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
-using static LethalLib.Modules.ContentLoader;
+using LethalLib.Modules;
+using LethalLib;
 
 namespace DeathNoteMod
 {
@@ -38,8 +39,8 @@ namespace DeathNoteMod
             // Loading assets
             string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            DNAssetBundle = AssetBundle.LoadFromFile(Path.Combine(sAssemblyLocation, "DNAssetBundle/DNAssetBundle"));
-            LoggerInstance.LogDebug($"Got DNAssetBundle at: {Path.Combine(sAssemblyLocation, "DNAssetBundle/DNAssetBundle")}");
+            DNAssetBundle = AssetBundle.LoadFromFile(Path.Combine(sAssemblyLocation, "mod_assets"));
+            LoggerInstance.LogDebug($"Got DNAssetBundle at: {Path.Combine(sAssemblyLocation, "mod_assets")}");
             if (DNAssetBundle == null)
             {
                 LoggerInstance.LogError("Failed to load custom assets."); // ManualLogSource for your plugin
@@ -47,20 +48,13 @@ namespace DeathNoteMod
             }
 
             // Registering item
-            int iRarity = 10;
+            int iRarity = 1000;
             LoggerInstance.LogDebug("Getting item");
-            Item DeathNote = DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNotePrefab.prefab"); // TODO: LOAD PROPER ASSET HERE, NEED PATHING TO THE PREFAB OR death_note.asset file
-            if (DeathNote == null)
-            {
-                LoggerInstance.LogError("DeathNote Item not found...");
-            }
-            LoggerInstance.LogDebug("pass1");
-            LethalLib.Modules.Utilities.FixMixerGroups(DeathNote.spawnPrefab); // TODO: CRASHING HERE
-            LoggerInstance.LogDebug("pass2");
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
-            LoggerInstance.LogDebug("pass3");
-            LethalLib.Modules.Items.RegisterScrap(DeathNote, iRarity, LethalLib.Modules.Levels.LevelTypes.All);
-            LoggerInstance.LogDebug("pass4");
+
+            Item DeathNote = DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset");
+            NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
+            Utilities.FixMixerGroups(DeathNote.spawnPrefab);
+            Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All); // TODO: ITEM SPAWNS IN GAME BUT ITS HALFWAY IN THE FLOOR NO MATTER WHAT I DO, REFOLLOW TUTORIAL
 
             //configVolume = Config.Bind("Volume", "MusicVolume", 1f, "Volume of the music. Must be between 0 and 1.");
 
