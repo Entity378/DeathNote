@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1193473441
+CRC: 3513351917
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 6fa7bf662fe1e67f3de61b7325f00a70
+    Hash: ecc4f7f5e3aa042b3cac7a6f30577544
   TypeTreeHash:
     serializedVersion: 2
     Hash: 8b09df7e0458775f7dcb8ff280280351
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 6fa7bf662fe1e67f3de61b7325f00a70
+    Hash: ecc4f7f5e3aa042b3cac7a6f30577544
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -57,12 +57,13 @@ SerializeReferenceClassIdentifiers:
   ClassName: Battery
 Assets:
 - Assets/DeathNote/Materials/DeathNote.mat
-- Assets/DeathNote/Audio/book-pocket.mp3
+- Assets/DeathNote/Audio/book-drop.mp3
 - Assets/DeathNote/DeathNoteItem.asset
 - Assets/DeathNote/Textures/DeathNoteUV.png
 - Assets/DeathNote/AudioMixerController/NonDiagetic.mixer
 - Assets/DeathNote/DeathNote.fbx
 - Assets/DeathNote/AudioMixerController/Diagetic.mixer
-- Assets/DeathNote/Audio/book-drop.mp3
+- Assets/DeathNote/Audio/book-grab.mp3
+- Assets/DeathNote/Audio/book-pocket.mp3
 - Assets/DeathNote/Textures/icon.png
 Dependencies: []

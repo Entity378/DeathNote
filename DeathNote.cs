@@ -21,7 +21,7 @@ namespace DeathNoteMod
         public static AssetBundle DNAssetBundle;
 
         public static DeathNoteBase PluginInstance { get; private set; } = null!;
-        public static ManualLogSource LoggerInstance { get; private set; }
+        public static ManualLogSource LoggerInstance;
         private readonly Harmony harmony = new Harmony(modGUID);
 
         public static ConfigEntry<float> configVolume;

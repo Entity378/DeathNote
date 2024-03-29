@@ -8,18 +8,22 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using System.Diagnostics.CodeAnalysis;
 using System;
+using System.Linq;
+using System.Reflection;
 
-/*namespace QuickRestart.Patches
+namespace QuickRestart.Patches
 {
     
-    [HarmonyPatch(typeof(HUDManager), "SubmitChat_performed")]
+    [HarmonyPatch(typeof(HUDManager))]
     public class SubmitChat
     {
         // TODO: make this not ugly
-        private static bool Prefix(HUDManager __instance, ref InputAction.CallbackContext context)
+        [HarmonyPatch("SubmitChat_performed")]
+        [HarmonyPrefix]
+        private static bool Prefix(HUDManager __instance)
         {
-            return;
-            if (!context.performed)
+
+            /*if (!context.performed)
             {
                 return true;
             }
@@ -27,7 +31,7 @@ using System;
             {
                 return true;
             }
-            PlayerControllerB local = GameNetworkManager.Instance.localPlayerController;
+            
             if (local == null)
             {
                 return true;
@@ -36,9 +40,49 @@ using System;
             if (manager == null)
             {
                 return true;
-            }
+            }*/
+            
+            LoggerInstance.LogDebug("start");
+            PlayerControllerB local = GameNetworkManager.Instance.localPlayerController;
+            LoggerInstance.LogDebug($"Got player: {local.playerUsername}");
+            LoggerInstance.LogDebug("pass 1");
             string text = __instance.chatTextField.text;
-            if (DeathNoteBase.PluginInstance.verifying)
+            LoggerInstance.LogDebug($"ChatSays '{text}'");
+            LoggerInstance.LogDebug("pass 2");
+            text = text.ToLower();
+            LoggerInstance.LogDebug("pass 3");
+            GrabbableObject heldObject = local.currentlyHeldObjectServer;
+            if (heldObject == null) { return true; }
+
+            LoggerInstance.LogDebug("pass 3.5");
+            if (heldObject.itemProperties.itemName == "Death Note" && text.Contains("/deathnote "))
+            {
+                LoggerInstance.LogDebug("pass 4");
+                string[] parts = text.Split(" ", 2);
+                if (parts.Length >= 2)
+                {
+                    LoggerInstance.LogDebug("pass 5");
+                    string name = parts[1];
+                    LoggerInstance.LogDebug($"PlayertoDie: '{name}'");
+
+                    PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == name).FirstOrDefault();
+                    if (playerToDie != null)
+                    {
+                        LoggerInstance.LogDebug("found player to kill!!!!!!"); // IT WORKS UP TO HERE!
+                    }
+                    else
+                    {
+                        LoggerInstance.LogDebug("Player not found...");
+                        SendChatMessage("Username is incorrect...");
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
+            /*if (DeathNoteBase.PluginInstance.verifying)
             {
                 if (text == "CONFIRM")
                 {
@@ -81,8 +125,14 @@ using System;
                     PluginInstance.ConfirmRestart();
                 }
                 return false;
-            }
+            }*/
             return true;
+        }
+
+        private static void SendChatMessage(string message)
+        {
+            MethodInfo chat = AccessTools.Method(typeof(HUDManager), "AddChatMessage");
+            chat?.Invoke(HUDManager.Instance, new object[] { message, "" });
         }
 
         private static void ResetTextbox(HUDManager manager, PlayerControllerB local)
@@ -94,4 +144,4 @@ using System;
             manager.typingIndicator.enabled = false;
         }
     }
-}*/
+}
