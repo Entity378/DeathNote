@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3513351917
+CRC: 3293192100
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: ecc4f7f5e3aa042b3cac7a6f30577544
+    Hash: 33ac19321c4b9d43ee989b3ba6bed48f
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 8b09df7e0458775f7dcb8ff280280351
+    Hash: bb1b56521a66758535ea72e2e6de6784
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: ecc4f7f5e3aa042b3cac7a6f30577544
+    Hash: 33ac19321c4b9d43ee989b3ba6bed48f
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -39,8 +39,6 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 11500000, guid: 3c36d0a92cbb1f26a39169ef0eae393a, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: 3d0cf24d2ccc3b7eab72048d0f57c437, type: 3}
-- Class: 114
   Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
 - Class: 115
   Script: {instanceID: 0}
@@ -52,18 +50,18 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 245
   Script: {instanceID: 0}
-SerializeReferenceClassIdentifiers:
-- AssemblyName: Assembly-CSharp
-  ClassName: Battery
+SerializeReferenceClassIdentifiers: []
 Assets:
+- Assets/DeathNote/Audio/book-grab.mp3
+- Assets/DeathNote/DeathNotePrefab.prefab
 - Assets/DeathNote/Materials/DeathNote.mat
+- Assets/DeathNote/Textures/ScrapItemIcon2.asset
+- Assets/DeathNote/Textures/ScrapItemIcon2.png
 - Assets/DeathNote/Audio/book-drop.mp3
 - Assets/DeathNote/DeathNoteItem.asset
 - Assets/DeathNote/Textures/DeathNoteUV.png
 - Assets/DeathNote/AudioMixerController/NonDiagetic.mixer
 - Assets/DeathNote/DeathNote.fbx
 - Assets/DeathNote/AudioMixerController/Diagetic.mixer
-- Assets/DeathNote/Audio/book-grab.mp3
 - Assets/DeathNote/Audio/book-pocket.mp3
-- Assets/DeathNote/Textures/icon.png
 Dependencies: []
