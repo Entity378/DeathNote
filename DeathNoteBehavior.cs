@@ -15,6 +15,7 @@ namespace DeathNote
 
         public override void ItemActivate(bool used, bool buttonDown = true)
         {
+            //DeathController.SpawnEnemyWithDeathType();
             base.ItemActivate(used, buttonDown);
             if (buttonDown)
             {

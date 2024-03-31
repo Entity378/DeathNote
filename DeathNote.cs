@@ -51,7 +51,7 @@ namespace DeathNoteMod
             }
 
             // Registering item
-            int iRarity = 1000;
+            int iRarity = 5;
             LoggerInstance.LogDebug("Getting item");
 
             Item DeathNote = DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset");
