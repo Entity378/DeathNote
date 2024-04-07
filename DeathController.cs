@@ -1,9 +1,12 @@
-﻿using BepInEx.Logging;
+﻿using BepInEx;
+using BepInEx.Logging;
 using DeathNoteMod;
 using GameNetcodeStuff;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace DeathNote
 {
@@ -11,8 +14,9 @@ namespace DeathNote
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
-        static PlayerControllerB playerToDie;
-        static string causeOfDeathString;
+        public static PlayerControllerB? PlayerToDie;
+        public static string? CauseOfDeathString;
+        private static CauseOfDeath CauseOfDeath;
 
 
         public static List<string> GetCauseOfDeathsAsStrings()
@@ -34,11 +38,11 @@ namespace DeathNote
             return deathType;
         }
 
-        public static void KillPlayerWithCauseOfDeath()
+        public static void GetCauseOfDeath()
         {
             CauseOfDeath causeOfDeath;
 
-            switch (causeOfDeathString.ToLower())
+            switch (CauseOfDeathString.ToLower())
             {
                 case "abandoned":
                     causeOfDeath = CauseOfDeath.Abandoned;
@@ -76,7 +80,34 @@ namespace DeathNote
                 case "suffocation":
                     causeOfDeath = CauseOfDeath.Suffocation;
                     break;
+                default:
+                    logger.LogDebug("Cant find type of death...");
+
+                    return;
             }
+
+            logger.LogDebug($"Got cause of death: {causeOfDeath}");
+        }
+
+        public static void KillPlayer()
+        {
+
+        }
+
+        private static List<SpawnableEnemyWithRarity> GetEnemies()
+        {
+            logger.LogDebug("Getting enemies");
+            List<SpawnableEnemyWithRarity> enemies = new List<SpawnableEnemyWithRarity>();
+            enemies = GameObject.Find("Terminal")
+                .GetComponentInChildren<Terminal>()
+                .moonsCatalogueList
+                .SelectMany(x => x.Enemies.Concat(x.DaytimeEnemies).Concat(x.OutsideEnemies))
+                .Where(x => x != null && x.enemyType != null && x.enemyType.name != null)
+                .GroupBy(x => x.enemyType.name, (k, v) => v.First())
+                .ToList();
+
+            logger.LogDebug($"Enemy types: {enemies.Count}");
+            return enemies;
         }
     }
 }

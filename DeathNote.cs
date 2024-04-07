@@ -9,6 +9,7 @@ using LethalLib.Modules;
 using LethalLib;
 using GameNetcodeStuff;
 using DeathNote;
+using UnityEngine.UIElements;
 
 namespace DeathNoteMod
 {
@@ -21,8 +22,7 @@ namespace DeathNoteMod
         private const string modName = "DeathNote";
         private const string modVersion = "0.1.0";
 
-        public static AssetBundle DNAssetBundle;
-        public static PlayerControllerB PlayerToDie;
+        public static AssetBundle? DNAssetBundle;
         public static DeathNoteBase PluginInstance { get; private set; } = null!;
         public static ManualLogSource LoggerInstance;
         private readonly Harmony harmony = new Harmony(modGUID);
@@ -50,17 +50,45 @@ namespace DeathNoteMod
                 return;
             }
 
-            // Registering item
-            int iRarity = 5;
-            LoggerInstance.LogDebug("Getting item");
+            
 
+            // Getting item
+            LoggerInstance.LogDebug("Getting item");
             Item DeathNote = DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset");
+            
+            // Assign script
             DeathNoteBehavior script = DeathNote.spawnPrefab.AddComponent<DeathNoteBehavior>();
 
             script.grabbable = true;
             script.grabbableToEnemies = true;
             script.itemProperties = DeathNote;
 
+            //// Getting UI
+            // Setting script
+            UIControllerScript uiController = DeathNote.spawnPrefab.AddComponent<UIControllerScript>();
+
+            // Setting UiDocument
+            UIDocument uiDocument = DeathNote.spawnPrefab.AddComponent<UIDocument>();
+            //uiDocument.visualTreeAsset = DNAssetBundle.LoadAsset<VisualTreeAsset>("Assets/DeathNote/DeathnoteUI.uxml");
+            
+            VisualTreeAsset visualTreeAsset = DNAssetBundle.LoadAsset<VisualTreeAsset>("Assets/DeathNote/DeathnoteUI.uxml");
+            //VisualElement root = uiDocument.visualTreeAsset.Instantiate();
+            VisualElement root = visualTreeAsset.Instantiate();
+            uiDocument.rootVisualElement.Add(root);
+
+            // Get buttons
+            uiController.lblResult = root.Q<Label>("lblResult");
+            if(uiController.lblResult == null) { LoggerInstance.LogError("lblResult not found."); }
+            uiController.txtPlayerUsername = root.Q<TextField>("txtPlayerUsername");
+            if (uiController.txtPlayerUsername == null) { return; }
+            uiController.dpdnDeathType = root.Q<DropdownField>("dpdnDeathType");
+            if (uiController.dpdnDeathType == null) { return; }
+            // TODO: Continue here
+
+
+
+            // Register Scrap
+            int iRarity = 5;
             NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
             Utilities.FixMixerGroups(DeathNote.spawnPrefab);
             Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All);
@@ -72,12 +100,6 @@ namespace DeathNoteMod
             harmony.PatchAll();
             
             LoggerInstance.LogInfo($"{modGUID} v{modVersion} has loaded!");
-        }
-
-        public static void SendChatMessage(string message)
-        {
-            MethodInfo chat = AccessTools.Method(typeof(HUDManager), "AddChatMessage");
-            chat?.Invoke(HUDManager.Instance, new object[] { message, "" });
         }
     }
 }

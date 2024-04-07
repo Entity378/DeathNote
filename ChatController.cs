@@ -1,25 +1,29 @@
-﻿using DeathNoteMod;
+﻿using BepInEx.Logging;
+using DeathNoteMod;
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.Linq;
+using System.Reflection;
 using UnityEngine.EventSystems;
-using static DeathNoteMod.DeathNoteBase;
 
-namespace QuickRestart.Patches
+namespace DeathNote
 {
 
     [HarmonyPatch(typeof(HUDManager))]
-    public class SubmitChatPatch
+    public class ChatController
     {
+        private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
+        private static bool verifyingCOS = false;
+
         // TODO: make this not ugly
         [HarmonyPatch("SubmitChat_performed")]
         [HarmonyPrefix]
         private static bool Prefix(HUDManager __instance)
         {
-            PlayerControllerB local = GameNetworkManager.Instance.localPlayerController;
+            PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
 
             string text = __instance.chatTextField.text.ToLower();
-            GrabbableObject heldObject = local.currentlyHeldObjectServer;
+            GrabbableObject heldObject = localPlayer.currentlyHeldObjectServer;
 
             if (heldObject == null) { return true; }
 
@@ -29,20 +33,20 @@ namespace QuickRestart.Patches
                 if (parts.Length >= 2)
                 {
                     string name = parts[1];
-                    LoggerInstance.LogDebug($"Getting player: '{name}'");
+                    logger.LogDebug($"Getting player: '{name}'");
                     PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == name).FirstOrDefault();
-                    
+
                     if (playerToDie != null)
                     {
-                        LoggerInstance.LogDebug($"Found player to kill: {playerToDie.playerUsername}"); // IT WORKS UP TO HERE!
-                        PlayerToDie = playerToDie;
+                        logger.LogDebug($"Found player to kill: {playerToDie.playerUsername}"); // IT WORKS UP TO HERE!
+                        DeathController.PlayerToDie = playerToDie;
 
-                        ResetTextbox(__instance, local);
+                        ResetTextbox(__instance, localPlayer);
                         return false;
                     }
                     else
                     {
-                        LoggerInstance.LogDebug("Player not found...");
+                        logger.LogDebug("Player not found...");
                         SendChatMessage("A name was unspecified or doesnt exist. (Use /deathnote playerusername)");
                     }
                 }
@@ -52,6 +56,12 @@ namespace QuickRestart.Patches
                 }
             }
             return true;
+        }
+
+        public static void SendChatMessage(string message)
+        {
+            MethodInfo chat = AccessTools.Method(typeof(HUDManager), "AddChatMessage");
+            chat?.Invoke(HUDManager.Instance, new object[] { message, "" });
         }
 
         private static void ResetTextbox(HUDManager manager, PlayerControllerB local)
