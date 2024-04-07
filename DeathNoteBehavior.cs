@@ -21,8 +21,8 @@ namespace DeathNote
             {
                 logger.LogDebug("Using item works!");
 
-
-
+                UIControllerScript uiController = base.GetComponent<UIControllerScript>();
+                if (uiController == null) { logger.LogError("UIControllerScript does not exist!"); }
 
                 /*PlayerControllerB player = DeathController.PlayerToDie;
                 if (player != null)

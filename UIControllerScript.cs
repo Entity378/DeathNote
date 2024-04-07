@@ -4,6 +4,8 @@ using System.Text;
 using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.Windows;
+using UnityEngine.InputSystem;
 
 namespace DeathNote
 {
@@ -12,7 +14,7 @@ namespace DeathNote
 
         public Label lblResult;
         public TextField txtPlayerUsername;
-        //Button btnSubmit;
+        public Button btnSubmit;
         public DropdownField dpdnDeathType;
         public TextField txtTimeOfDeath;
         public ProgressBar pbRemainingTime;
@@ -25,6 +27,29 @@ namespace DeathNote
         public Label lblSEWarning;
         public Button btnActivateEyes;
 
+        public void Init()
+        {
+            btnSubmit.clicked += BtnSubmitOnClick;
+            txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
+            btnActivateEyes.clicked += BtnActivateEyesOnClick;
+        }
 
+        private void txtPlayerUsernameOnValueChanged(KeyUpEvent evt)
+        {
+            if (evt.keyCode == KeyCode.Return)
+            {
+                BtnActivateEyesOnClick();
+            }
+        }
+
+        private void BtnActivateEyesOnClick()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void BtnSubmitOnClick()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
