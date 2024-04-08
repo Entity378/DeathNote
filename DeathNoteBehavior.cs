@@ -1,28 +1,41 @@
 ﻿using BepInEx.Logging;
-using DeathNoteMod;
+using DeathNote;
 using GameNetcodeStuff;
 using LethalNetworkAPI;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace DeathNote
 {
     internal class DeathNoteBehavior : PhysicsProp
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
+        UIControllerScript uiController;
 
         public override void ItemActivate(bool used, bool buttonDown = true)
         {
-            //DeathController.SpawnEnemyWithDeathType();
             base.ItemActivate(used, buttonDown);
             if (buttonDown)
             {
                 logger.LogDebug("Using item works!");
 
-                UIControllerScript uiController = base.GetComponent<UIControllerScript>();
+                //UIControllerScript uiController = base.GetComponent<UIControllerScript>();
+                if (uiController == null) { uiController = DeathNoteBase.DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset").spawnPrefab.GetComponent<UIControllerScript>(); }
                 if (uiController == null) { logger.LogError("UIControllerScript does not exist!"); }
+
+                if (uiController.root.style.display == DisplayStyle.None)
+                {
+                    uiController.ShowUI();
+                }
+                else
+                {
+                    uiController.HideUI();
+                }
+
+                List<SpawnableEnemyWithRarity> enemies = DeathController.GetEnemies();
 
                 /*PlayerControllerB player = DeathController.PlayerToDie;
                 if (player != null)

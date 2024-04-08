@@ -1,6 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using DeathNoteMod;
+using DeathNote;
 using GameNetcodeStuff;
 using System;
 using System.Collections.Generic;
@@ -94,7 +94,12 @@ namespace DeathNote
 
         }
 
-        private static List<SpawnableEnemyWithRarity> GetEnemies()
+        public static void GetEnemy()
+        {
+            //public List<EnemyAI> SpawnedEnemies = new List<EnemyAI>();
+        }
+
+        public static List<SpawnableEnemyWithRarity> GetEnemies()
         {
             logger.LogDebug("Getting enemies");
             List<SpawnableEnemyWithRarity> enemies = new List<SpawnableEnemyWithRarity>();

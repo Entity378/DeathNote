@@ -11,7 +11,7 @@ using GameNetcodeStuff;
 using DeathNote;
 using UnityEngine.UIElements;
 
-namespace DeathNoteMod
+namespace DeathNote
 {
     [BepInPlugin(modGUID, modName, modVersion)]
     [BepInDependency(LethalLib.Plugin.ModGUID)]
@@ -77,48 +77,19 @@ namespace DeathNoteMod
             if (uiDocument == null) { LoggerInstance.LogError("uiDocument not found."); return; }
             
             LoggerInstance.LogDebug("Getting visual tree asset");
-            //uiDocument.visualTreeAsset = DNAssetBundle.LoadAsset<VisualTreeAsset>("Assets/DeathNote/DeathnoteUI.uxml");
-            VisualTreeAsset visualTreeAsset = DNAssetBundle.LoadAsset<VisualTreeAsset>("Assets/DeathNote/DeathnoteUI.uxml");
-            if (visualTreeAsset == null) { LoggerInstance.LogError("visualTreeAsset not found."); return; }
-            //VisualElement root = uiDocument.visualTreeAsset.Instantiate();
-            VisualElement root = visualTreeAsset.Instantiate();
+            uiDocument.visualTreeAsset = DNAssetBundle.LoadAsset<VisualTreeAsset>("Assets/DeathNote/DeathnoteUI.uxml");
+            if (uiDocument.visualTreeAsset == null) { LoggerInstance.LogError("visualTreeAsset not found."); return; }
+            VisualElement root = uiDocument.visualTreeAsset.Instantiate();
             if (root == null) { LoggerInstance.LogError("root not found."); return; }
-            
+
+            if (uiDocument.rootVisualElement == null) { LoggerInstance.LogError("uiDocument.rootVisualElement not found."); return; }
             LoggerInstance.LogDebug("Adding root");
-            uiDocument.rootVisualElement.Add(root); // this is returning an error, nullreferenceexception
+            //root.style.display = DisplayStyle.None;
+            uiDocument.rootVisualElement.Add(root);
+            uiDocument.rootVisualElement.style.display = DisplayStyle.None;
             LoggerInstance.LogDebug("Got root");
 
-            // Get buttons
-            uiController.lblResult = root.Q<Label>("lblResult");
-            if(uiController.lblResult == null) { LoggerInstance.LogError("lblResult not found."); return; }
-            uiController.txtPlayerUsername = root.Q<TextField>("txtPlayerUsername");
-            if (uiController.txtPlayerUsername == null) { LoggerInstance.LogError("txtPlayerUsername not found."); return; }
-            uiController.btnSubmit = root.Q<Button>("btnSubmit");
-            if (uiController.btnSubmit == null) { LoggerInstance.LogError("btnSubmit not found."); return; }
-            uiController.dpdnDeathType = root.Q<DropdownField>("dpdnDeathType");
-            if (uiController.dpdnDeathType == null) { LoggerInstance.LogError("dpdnDeathType not found."); return; }
-            uiController.txtTimeOfDeath = root.Q<TextField>("txtTimeOfDeath");
-            if (uiController.txtTimeOfDeath == null) { LoggerInstance.LogError("txtTimeOfDeath not found."); return; }
-            uiController.pbRemainingTime = root.Q<ProgressBar>("pbRemainingTime");
-            if (uiController.pbRemainingTime == null) { LoggerInstance.LogError("pbRemainingTime not found."); return; }
-            uiController.lblInstructions1 = root.Q<Label>("lblInstructions1");
-            if (uiController.lblInstructions1 == null) { LoggerInstance.LogError("lblInstructions1 not found."); return; }
-            uiController.lblInstructions2 = root.Q<Label>("lblInstructions2");
-            if (uiController.lblInstructions2 == null) { LoggerInstance.LogError("lblInstructions2 not found."); return; }
-            uiController.lblInstructions3 = root.Q<Label>("lblInstructions3");
-            if (uiController.lblInstructions3 == null) { LoggerInstance.LogError("lblInstructions3 not found."); return; }
-            uiController.lblSEDescription = root.Q<Label>("lblSEDescription");
-            if (uiController.lblSEDescription == null) { LoggerInstance.LogError("lblSEDescription not found."); return; }
-            uiController.lblSEWarning = root.Q<Label>("lblSEWarning");
-            if (uiController.lblSEWarning == null) { LoggerInstance.LogError("lblSEWarning not found."); return; }
-            uiController.btnActivateEyes = root.Q<Button>("btnActivateEyes");
-            if (uiController.btnActivateEyes == null) { LoggerInstance.LogError("btnActivateEyes not found."); return; }
-
-            uiController.Init();
-            LoggerInstance.LogDebug("Got Controls for UI");
-
             
-
 
 
             // Register Scrap

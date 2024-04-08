@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using BepInEx.Logging;
-using DeathNoteMod;
+using DeathNote;
 using GameNetcodeStuff;
 using LethalNetworkAPI;
 using UnityEngine;

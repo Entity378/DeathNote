@@ -1,5 +1,5 @@
 ﻿using BepInEx.Logging;
-using DeathNoteMod;
+using DeathNote;
 using GameNetcodeStuff;
 using HarmonyLib;
 using System.Linq;
