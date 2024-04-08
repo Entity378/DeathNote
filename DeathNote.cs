@@ -98,7 +98,7 @@ namespace DeathNote
             NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
             Utilities.FixMixerGroups(DeathNote.spawnPrefab);
             Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All); // TODO: Get Item from here and not from AssetBundle; may need to readd panel settings and remove when hiding the ui
-            //DeathNote.spawnPrefab.AddComponent<PanelSettings>(); // TODO: remove when hiding the ui> use something like this for panel settings???
+            //DeathNote.spawnPrefab.AddComponent<PanelSettings>(); // TODO: remove when hiding the ui> use something like this for panel settings??? check unityeditor
 
             NetworkHandler.Init();
 
