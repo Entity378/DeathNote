@@ -17,7 +17,6 @@ namespace DeathNote
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
         public VisualElement root;
-        private Item deathNoteItem;
 
         public Label lblResult;
         public TextField txtPlayerUsername;
@@ -38,12 +37,13 @@ namespace DeathNote
         {
             logger.LogMessage("UIControllerScript: Start()");
 
-            deathNoteItem = DeathNoteBase.DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset");
+            // Load item
+            Item deathNoteItem = DeathNoteBase.DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset"); // TODO: this may be getting a new instance each time
             if (deathNoteItem == null) { logger.LogError("deathNoteItem is null!"); return; }
-            root = deathNoteItem.spawnPrefab.GetComponent<UIDocument>().rootVisualElement;
+            //root = deathNoteItem.spawnPrefab.GetComponent<UIDocument>().rootVisualElement;
             if (root == null) { logger.LogError("root is null!"); return; }
-            HideUI();
 
+            // Find elements
             lblResult = root.Q<Label>("lblResult");
             if (lblResult == null) { logger.LogError("lblResult not found."); return; }
             txtPlayerUsername = root.Q<TextField>("txtPlayerUsername");
@@ -72,37 +72,39 @@ namespace DeathNote
             dpdnDeathType.choices = new List<string>() { "Abandoned", "Blast", "Bludgeoning", "Crushing", "Drowning", "Electrocution", "Gravity", "Gunshots", "Kicking", "Mauling", "Strangulation", "Suffocation" };
             logger.LogDebug("Got Controls for UI");
 
+            // Add event handlers
             btnSubmit.clicked += BtnSubmitOnClick;
-            logger.LogDebug("UIControllerScript: btnSubmit.clicked += BtnSubmitOnClick;");
             txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
             root.RegisterCallback<KeyUpEvent>(rootOnKeyUpEvent);
             btnActivateEyes.clicked += BtnActivateEyesOnClick;
-            HideUI(); // this dont work as expected??????
-            logger.LogDebug("UIControllerScript: End()");
-            // TODO: code gets to here, but UI keeps showing when item is spawned in the game
+
+            logger.LogDebug("UIControllerScript: Start() complete");
         }
+
+
 
         public void Update()
         {
-            root.style.display = DisplayStyle.None;
+            //root.style.display = DisplayStyle.None;
         }
 
         public void ShowUI()
         {
+            logger.LogDebug("ShowUI");
             if (root == null) { logger.LogError("root is null!"); return; }
             root.style.display = DisplayStyle.Flex;
         }
 
         public void HideUI()
         {
+            logger.LogDebug("HideUI");
             if (root == null) { logger.LogError("root is null!"); return; }
             root.style.display = DisplayStyle.None;
-            root.style.visibility = Visibility.Hidden;
         }
 
         public void ResetUI()
         {
-
+            logger.LogDebug("ResetUI");
             Item DeathNote = DeathNoteBase.DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset");
             UIDocument uiDocument = DeathNote.spawnPrefab.GetComponent<UIDocument>();
 
@@ -113,14 +115,16 @@ namespace DeathNote
 
         private void txtPlayerUsernameOnValueChanged(KeyUpEvent evt)
         {
+            logger.LogDebug($"txtPlayerUsernameOnValueChanged: {evt.keyCode}");
             if (evt.keyCode == KeyCode.Return)
             {
-                BtnActivateEyesOnClick();
+                BtnSubmitOnClick();
             }
         }
 
         private void rootOnKeyUpEvent(KeyUpEvent evt)
         {
+            logger.LogDebug($"rootOnKeyUpEvent: {evt.keyCode}");
             if (evt.keyCode == KeyCode.Escape && root.style.display == DisplayStyle.Flex)
             {
                 root.style.display = DisplayStyle.None;
@@ -129,11 +133,13 @@ namespace DeathNote
 
         private void BtnActivateEyesOnClick()
         {
+            logger.LogDebug("BtnActivateEyesOnClick");
             throw new NotImplementedException();
         }
 
         private void BtnSubmitOnClick()
         {
+            logger.LogDebug("BtnSubmitOnClick");
             throw new NotImplementedException();
         }
     }

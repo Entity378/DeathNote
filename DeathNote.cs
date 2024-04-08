@@ -67,12 +67,12 @@ namespace DeathNote
             //// Getting UI
             // Setting script
             UIControllerScript uiController = DeathNote.spawnPrefab.AddComponent<UIControllerScript>();
-            uiController.enabled = true; // TODO: might not be necessary
+            if (uiController == null) { LoggerInstance.LogError("uiController not found."); return; }
+            //uiController.enabled = true; // TODO: might not be necessary
             LoggerInstance.LogDebug("Got UIControllerScript");
 
             // Setting UiDocument
             LoggerInstance.LogDebug("Getting UIDocument");
-            //UIDocument uiDocument = DeathNote.spawnPrefab.AddComponent<UIDocument>();
             UIDocument uiDocument = DeathNote.spawnPrefab.GetComponent<UIDocument>();
             if (uiDocument == null) { LoggerInstance.LogError("uiDocument not found."); return; }
             
@@ -87,16 +87,18 @@ namespace DeathNote
             //root.style.display = DisplayStyle.None;
             uiDocument.rootVisualElement.Add(root);
             uiDocument.rootVisualElement.style.display = DisplayStyle.None;
+            uiController.root = root;
             LoggerInstance.LogDebug("Got root");
 
             
 
 
             // Register Scrap
-            int iRarity = 5;
+            int iRarity = 1000;
             NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
             Utilities.FixMixerGroups(DeathNote.spawnPrefab);
-            Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All);
+            Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All); // TODO: Get Item from here and not from AssetBundle; may need to readd panel settings and remove when hiding the ui
+            //DeathNote.spawnPrefab.AddComponent<PanelSettings>(); // TODO: remove when hiding the ui> use something like this for panel settings???
 
             NetworkHandler.Init();
 

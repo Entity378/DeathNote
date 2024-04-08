@@ -23,19 +23,17 @@ namespace DeathNote
                 logger.LogDebug("Using item works!");
 
                 //UIControllerScript uiController = base.GetComponent<UIControllerScript>();
-                if (uiController == null) { uiController = DeathNoteBase.DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset").spawnPrefab.GetComponent<UIControllerScript>(); }
+                if (uiController == null) { uiController = DeathNoteBase.DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset").spawnPrefab.GetComponent<UIControllerScript>(); logger.LogDebug("Got UIControllerScript"); }
                 if (uiController == null) { logger.LogError("UIControllerScript does not exist!"); }
-
                 if (uiController.root.style.display == DisplayStyle.None)
                 {
                     uiController.ShowUI();
                 }
-                else
+                else // TODO: might not need this/might cause issues
                 {
                     uiController.HideUI();
                 }
-
-                List<SpawnableEnemyWithRarity> enemies = DeathController.GetEnemies();
+                //List<SpawnableEnemyWithRarity> enemies = DeathController.GetEnemies();
 
                 /*PlayerControllerB player = DeathController.PlayerToDie;
                 if (player != null)
