@@ -13,7 +13,6 @@ namespace DeathNote
     internal class DeathNoteBehavior : PhysicsProp
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
-        UIControllerScript uiController;
 
         public override void ItemActivate(bool used, bool buttonDown = true)
         {
@@ -22,15 +21,20 @@ namespace DeathNote
             {
                 logger.LogDebug("Using item works!");
 
-                //UIControllerScript uiController = base.GetComponent<UIControllerScript>();
-                if (uiController == null) { uiController = DeathNoteBase.DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset").spawnPrefab.GetComponent<UIControllerScript>(); logger.LogDebug("Got UIControllerScript"); }
+                UIControllerScript uiController = GetComponent<UIControllerScript>();
                 if (uiController == null) { logger.LogError("UIControllerScript does not exist!"); }
-                if (uiController.root.style.display == DisplayStyle.None)
+                logger.LogDebug("Got UIControllerScript");
+
+                VisualElement root = GetComponent<UIDocument>().rootVisualElement;
+
+                if (root.style.display == DisplayStyle.None)
                 {
+                    logger.LogDebug("Showing UI");
                     uiController.ShowUI();
                 }
                 else // TODO: might not need this/might cause issues
                 {
+                    logger.LogDebug("Hiding UI");
                     uiController.HideUI();
                 }
                 //List<SpawnableEnemyWithRarity> enemies = DeathController.GetEnemies();

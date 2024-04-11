@@ -15,7 +15,6 @@ namespace DeathNote
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
         private static bool verifyingCOS = false;
 
-        // TODO: make this not ugly
         [HarmonyPatch("SubmitChat_performed")]
         [HarmonyPrefix]
         private static bool Prefix(HUDManager __instance)
