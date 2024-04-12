@@ -22,16 +22,16 @@ namespace DeathNote
                 logger.LogDebug("Using item works!");
 
                 UIControllerScript uiController = GetComponent<UIControllerScript>();
-                VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
+                //VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
                 logger.LogDebug("Got veMain");
-                logger.LogMessage(veMain.style.display.ToString());
-                if (veMain.style.display == null)
+                logger.LogMessage(uiController.veMain.style.display.ToString());
+                if (uiController.veMain.style.display == null)
                 {
                     logger.LogDebug("veMain.style.display is null");
                     return;
                 }
                 
-                if (veMain.style.display == DisplayStyle.None)
+                if (uiController.veMain.style.display == DisplayStyle.None)
                 {
                     logger.LogDebug("Showing UI");
                     uiController.ShowUI();

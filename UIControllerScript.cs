@@ -19,7 +19,7 @@ namespace DeathNote
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
         //public static UIControllerScript Instance { get; private set; }
-        public VisualElement root;
+        //public VisualElement root;
         public VisualElement veMain;
 
         public Label lblResult;
@@ -60,7 +60,7 @@ namespace DeathNote
             logger.LogDebug("Got root");
             root = uiDocument.rootVisualElement;
 
-            VisualElement veMain = uiDocument.rootVisualElement.Q<VisualElement>("veMain");
+            veMain = uiDocument.rootVisualElement.Q<VisualElement>("veMain");
             veMain.style.display = DisplayStyle.None;
             if (veMain == null) { logger.LogError("veMain not found."); return; }
             //logger.LogMessage($"display: {veMain.style.display}");
@@ -106,13 +106,13 @@ namespace DeathNote
 
         private void Update()
         {
-            //if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
+            if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
         }
 
         public void ShowUI()
         {
             logger.LogDebug("Showing UI");
-            VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
+            //VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
             veMain.style.display = DisplayStyle.Flex;
 
             UnityEngine.Cursor.lockState = CursorLockMode.None;
@@ -123,7 +123,7 @@ namespace DeathNote
         public void HideUI()
         {
             logger.LogDebug("Hiding UI");
-            VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
+            //VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
             veMain.style.display = DisplayStyle.None;
 
             UnityEngine.Cursor.lockState = CursorLockMode.Locked; // TODO: patch when escape is pressed to open the quick menu so it doesnt open the pause menu when in the ui
