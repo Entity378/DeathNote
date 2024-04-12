@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 600043109
+CRC: 2302681193
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 583fdb7579c8980b3e8c9a1fc44de911
+    Hash: 7d5475328ae7a784c41f667f79c4bff7
   TypeTreeHash:
     serializedVersion: 2
     Hash: 16ef1ac7306339def4bfc060e33cacad
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 583fdb7579c8980b3e8c9a1fc44de911
+    Hash: 7d5475328ae7a784c41f667f79c4bff7
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -102,18 +102,18 @@ SerializeReferenceClassIdentifiers:
 Assets:
 - Assets/DeathNote/Audio/book-grab.mp3
 - Assets/DeathNote/DeathNotePrefab.prefab
+- Assets/DeathNote/DeathnoteUI.uxml
 - Assets/DeathNote/Materials/DeathNote.mat
-- Assets/DeathNote/Textures/ScrapItemIcon2.asset
 - Assets/DeathNote/Textures/ScrapItemIcon2.png
-- Assets/DeathNote/UI/DeathnoteUI.uxml
 - Assets/DeathNote/Audio/book-drop.mp3
+- Assets/DeathNote/DeathNote Panel Settings.asset
+- Assets/DeathNote/Textures/ScrapItemIcon2.asset
 - Assets/DeathNote/DeathNoteItem.asset
 - Assets/DeathNote/Textures/DeathNoteUV.png
 - Assets/DeathNote/AudioMixerController/NonDiagetic.mixer
-- Assets/DeathNote/UI/Death Note.ttf
+- Assets/DeathNote/Death Note.ttf
 - Assets/DeathNote/DeathNote.fbx
 - Assets/DeathNote/AudioMixerController/Diagetic.mixer
-- Assets/DeathNote/UI/DeathNoteUI Panel Settings.asset
 - Assets/DeathNote/Textures/ui_background.jpg
 - Assets/DeathNote/Textures/ui_shinigami_eye.png
 - Assets/DeathNote/Audio/book-pocket.mp3

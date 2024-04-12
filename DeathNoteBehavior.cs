@@ -25,6 +25,11 @@ namespace DeathNote
                 VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
                 logger.LogDebug("Got veMain");
                 logger.LogMessage(veMain.style.display.ToString());
+                if (veMain.style.display == null)
+                {
+                    logger.LogDebug("veMain.style.display is null");
+                    return;
+                }
                 
                 if (veMain.style.display == DisplayStyle.None)
                 {

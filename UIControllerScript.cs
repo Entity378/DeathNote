@@ -19,8 +19,8 @@ namespace DeathNote
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
         //public static UIControllerScript Instance { get; private set; }
-        //public VisualElement root;
-        //public VisualElement veMain;
+        public VisualElement root;
+        public VisualElement veMain;
 
         public Label lblResult;
         public TextField txtPlayerUsername;
@@ -53,14 +53,17 @@ namespace DeathNote
             
             // Instantiate root
             VisualElement root = uiDocument.visualTreeAsset.Instantiate();
-            if (root == null) { logger.LogError("veMain is null!"); return; }
+            if (root == null) { logger.LogError("root is null!"); return; }
             logger.LogDebug("Adding root");
             uiDocument.rootVisualElement.Add(root);
             if (uiDocument.rootVisualElement == null) { logger.LogError("uiDocument.rootVisualElement not found."); return; }
-            logger.LogDebug("Got veMain");
+            logger.LogDebug("Got root");
             root = uiDocument.rootVisualElement;
-            VisualElement veMain = root.Q<VisualElement>("veMain");
-            logger.LogMessage($"display: {veMain.style.display}");
+
+            VisualElement veMain = uiDocument.rootVisualElement.Q<VisualElement>("veMain");
+            veMain.style.display = DisplayStyle.None;
+            if (veMain == null) { logger.LogError("veMain not found."); return; }
+            //logger.LogMessage($"display: {veMain.style.display}");
 
             // Find elements
             lblResult = root.Q<Label>("lblResult");
@@ -93,12 +96,9 @@ namespace DeathNote
             logger.LogDebug("Got Controls for UI");
 
             // Add event handlers
-            //btnSubmit.clicked += BtnSubmitOnClick;
             btnSubmit.RegisterCallback<ClickEvent>(BtnSubmitOnClick);
-            //btnActivateEyes.clicked += BtnActivateEyesOnClick;
             btnActivateEyes.RegisterCallback<ClickEvent>(BtnActivateEyesOnClick);
             txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
-            //root.RegisterCallback<KeyUpEvent>(rootOnKeyUpEvent);
 
             //Instance = this;
             logger.LogDebug("UIControllerScript: Start() complete");
@@ -150,11 +150,13 @@ namespace DeathNote
 
         private void BtnSubmitOnClick(ClickEvent evt)
         {
+            logger.LogDebug("BtnSubmitOnClick");
             throw new NotImplementedException();
         }
 
         private void BtnActivateEyesOnClick(ClickEvent evt)
         {
+            logger.LogDebug("BtnActivateEyesOnClick");
             throw new NotImplementedException();
         }
 
@@ -165,19 +167,6 @@ namespace DeathNote
             {
                 throw new NotImplementedException();
                 // TODO: implement
-            }
-        }
-
-        private void rootOnKeyUpEvent(KeyUpEvent evt)
-        {
-            logger.LogDebug("rootOnKeyUpEvent");
-            VisualElement root = GetComponent<UIDocument>().rootVisualElement;
-            if (root == null) { logger.LogError("root is null!"); return; }
-
-            logger.LogDebug($"rootOnKeyUpEvent: {evt.keyCode}");
-            if (evt.keyCode == KeyCode.Escape && root.Q<VisualElement>("veMain").style.display == DisplayStyle.Flex)
-            {
-                HideUI();
             }
         }
     }
