@@ -18,7 +18,7 @@ namespace DeathNote
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
-        //public static UIControllerScript Instance { get; private set; }
+        public static UIControllerScript Instance { get; private set; }
         //public VisualElement root;
         public VisualElement veMain;
 
@@ -40,6 +40,12 @@ namespace DeathNote
         private void Start()
         {
             logger.LogDebug("UIControllerScript: Start()");
+
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+
 
             // Get UIDocument
             logger.LogDebug("Getting UIDocument");
@@ -100,13 +106,13 @@ namespace DeathNote
             btnActivateEyes.RegisterCallback<ClickEvent>(BtnActivateEyesOnClick);
             txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
 
-            //Instance = this;
             logger.LogDebug("UIControllerScript: Start() complete");
         }
 
         private void Update()
         {
             if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
+            //Instance = this;
         }
 
         public void ShowUI()
