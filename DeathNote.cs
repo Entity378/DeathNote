@@ -51,11 +51,10 @@ namespace DeathNote
                 return;
             }
 
-            
-
             // Getting item
             LoggerInstance.LogDebug("Getting item");
             Item DeathNote = DNAssetBundle.LoadAsset<Item>("Assets/DeathNote/DeathNoteItem.asset");
+            LoggerInstance.LogDebug($"Got item: {DeathNote.name}");
             
             // Assign behavior script
             DeathNoteBehavior script = DeathNote.spawnPrefab.AddComponent<DeathNoteBehavior>();
@@ -63,41 +62,18 @@ namespace DeathNote
             script.grabbable = true;
             script.grabbableToEnemies = true;
             script.itemProperties = DeathNote;
-            
+
+            // Assign UIControllerScript
             LoggerInstance.LogDebug("Setting up UI");
-            //// Getting UI
-            // Setting script
             UIControllerScript uiController = DeathNote.spawnPrefab.AddComponent<UIControllerScript>();
             if (uiController == null) { LoggerInstance.LogError("uiController not found."); return; }
-            //uiController.enabled = true; // TODO: might not be necessary
             LoggerInstance.LogDebug("Got UIControllerScript");
-
-            // Setting UiDocument
-            /*LoggerInstance.LogDebug("Getting UIDocument");
-            UIDocument uiDocument = DeathNote.spawnPrefab.GetComponent<UIDocument>();
-            if (uiDocument == null) { LoggerInstance.LogError("uiDocument not found."); return; }
-            
-            LoggerInstance.LogDebug("Getting visual tree asset");
-            //uiDocument.visualTreeAsset = DNAssetBundle.LoadAsset<VisualTreeAsset>("Assets/DeathNote/DeathnoteUI.uxml");
-            if (uiDocument.visualTreeAsset == null) { LoggerInstance.LogError("visualTreeAsset not found."); return; }
-            VisualElement root = uiDocument.visualTreeAsset.Instantiate();
-
-            LoggerInstance.LogDebug("Adding root");
-            uiDocument.rootVisualElement.Add(root);
-            if (uiDocument.rootVisualElement == null) { LoggerInstance.LogError("uiDocument.rootVisualElement not found."); return; }
-            LoggerInstance.LogDebug("Got root");
-
-            uiDocument.rootVisualElement.style.display = DisplayStyle.None;*/
-
-
-
 
             // Register Scrap
             int iRarity = 1000; // TODO: Change this back to 5 later
             NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
             Utilities.FixMixerGroups(DeathNote.spawnPrefab);
-            Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All); // TODO: Get Item from here and not from AssetBundle; may need to readd panel settings and remove when hiding the ui
-            //DeathNote.spawnPrefab.AddComponent<PanelSettings>(); // TODO: remove when hiding the ui> use something like this for panel settings??? check unityeditor
+            Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All);
             
             NetworkHandler.Init();
 

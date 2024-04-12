@@ -22,21 +22,16 @@ namespace DeathNote
                 logger.LogDebug("Using item works!");
 
                 UIControllerScript uiController = GetComponent<UIControllerScript>();
-                if (uiController == null) { logger.LogError("UIControllerScript does not exist!"); }
-                logger.LogDebug("Got UIControllerScript");
-
-                VisualElement root = GetComponent<UIDocument>().rootVisualElement;
-
-                if (root.style.display == DisplayStyle.None)
+                VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
+                logger.LogDebug("Got veMain");
+                logger.LogMessage(veMain.style.display.ToString());
+                
+                if (veMain.style.display == DisplayStyle.None)
                 {
                     logger.LogDebug("Showing UI");
                     uiController.ShowUI();
                 }
-                else // TODO: might not need this/might cause issues
-                {
-                    logger.LogDebug("Hiding UI");
-                    uiController.HideUI();
-                }
+                
                 //List<SpawnableEnemyWithRarity> enemies = DeathController.GetEnemies();
 
                 /*PlayerControllerB player = DeathController.PlayerToDie;

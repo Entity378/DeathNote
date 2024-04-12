@@ -18,6 +18,10 @@ namespace DeathNote
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
+        //public static UIControllerScript Instance { get; private set; }
+        //public VisualElement root;
+        //public VisualElement veMain;
+
         public Label lblResult;
         public TextField txtPlayerUsername;
         public Button btnSubmit;
@@ -33,29 +37,30 @@ namespace DeathNote
         public Label lblSEWarning;
         public Button btnActivateEyes;
 
-        public void Start()
+        private void Start()
         {
-            logger.LogMessage("UIControllerScript: Start()");
+            logger.LogDebug("UIControllerScript: Start()");
 
+            // Get UIDocument
             logger.LogDebug("Getting UIDocument");
             UIDocument uiDocument = GetComponent<UIDocument>(); // TODO: might need to enable or something
             if (uiDocument == null) { logger.LogError("uiDocument not found."); return; }
 
+            // Get VisualTreeAsset
             logger.LogDebug("Getting visual tree asset");
             //uiDocument.visualTreeAsset = DNAssetBundle.LoadAsset<VisualTreeAsset>("Assets/DeathNote/DeathnoteUI.uxml");
             if (uiDocument.visualTreeAsset == null) { logger.LogError("visualTreeAsset not found."); return; }
+            
+            // Instantiate root
             VisualElement root = uiDocument.visualTreeAsset.Instantiate();
-
+            if (root == null) { logger.LogError("veMain is null!"); return; }
             logger.LogDebug("Adding root");
             uiDocument.rootVisualElement.Add(root);
             if (uiDocument.rootVisualElement == null) { logger.LogError("uiDocument.rootVisualElement not found."); return; }
-            logger.LogDebug("Got root");
-
-            uiDocument.rootVisualElement.style.display = DisplayStyle.None;
-
-            root = GetComponent<UIDocument>().rootVisualElement;
-            //root.SetEnabled(true); // TODO: temporary
-            if (root == null) { logger.LogError("root is null!"); return; }
+            logger.LogDebug("Got veMain");
+            root = uiDocument.rootVisualElement;
+            VisualElement veMain = root.Q<VisualElement>("veMain");
+            logger.LogMessage($"display: {veMain.style.display}");
 
             // Find elements
             lblResult = root.Q<Label>("lblResult");
@@ -83,57 +88,74 @@ namespace DeathNote
             btnActivateEyes = root.Q<Button>("btnActivateEyes");
             if (btnActivateEyes == null) { logger.LogError("btnActivateEyes not found."); return; }
 
+            // Set up controls
             dpdnDeathType.choices = new List<string>() { "Abandoned", "Blast", "Bludgeoning", "Crushing", "Drowning", "Electrocution", "Gravity", "Gunshots", "Kicking", "Mauling", "Strangulation", "Suffocation" };
             logger.LogDebug("Got Controls for UI");
 
             // Add event handlers
-            btnSubmit.clicked += BtnSubmitOnClick;
+            //btnSubmit.clicked += BtnSubmitOnClick;
+            btnSubmit.RegisterCallback<ClickEvent>(BtnSubmitOnClick);
+            //btnActivateEyes.clicked += BtnActivateEyesOnClick;
+            btnActivateEyes.RegisterCallback<ClickEvent>(BtnActivateEyesOnClick);
             txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
-            root.RegisterCallback<KeyUpEvent>(rootOnKeyUpEvent);
-            btnActivateEyes.clicked += BtnActivateEyesOnClick;
+            //root.RegisterCallback<KeyUpEvent>(rootOnKeyUpEvent);
 
+            //Instance = this;
             logger.LogDebug("UIControllerScript: Start() complete");
         }
 
-
-
-        public void Update()
+        private void Update()
         {
-            //root.style.display = DisplayStyle.None;
+            //if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
         }
 
         public void ShowUI()
         {
-            VisualElement root = GetComponent<UIDocument>().rootVisualElement;
-            if (root == null) { logger.LogError("root is null!"); return; }
+            logger.LogDebug("Showing UI");
+            VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
+            veMain.style.display = DisplayStyle.Flex;
 
-            logger.LogDebug("ShowUI");
-            if (root == null) { logger.LogError("root is null!"); return; }
-            
-            root.style.display = DisplayStyle.Flex;
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+            StartOfRound.Instance.localPlayerUsingController = false;
         }
 
         public void HideUI()
         {
-            VisualElement root = GetComponent<UIDocument>().rootVisualElement;
-            if (root == null) { logger.LogError("root is null!"); return; }
+            logger.LogDebug("Hiding UI");
+            VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
+            veMain.style.display = DisplayStyle.None;
 
-            logger.LogDebug("HideUI");
-            if (root == null) { logger.LogError("root is null!"); return; }
-            root.style.display = DisplayStyle.None;
+            UnityEngine.Cursor.lockState = CursorLockMode.Locked; // TODO: patch when escape is pressed to open the quick menu so it doesnt open the pause menu when in the ui
+            UnityEngine.Cursor.visible = false;
+            StartOfRound.Instance.localPlayerUsingController = false;
+            // playerActions.Movement.Enable();
         }
 
-        public void ResetUI()
+        private void ResetUI()
         {
             logger.LogDebug("ResetUI");
-            UIDocument uiDocument = GetComponent<UIDocument>();
-            if (uiDocument == null) { logger.LogError("uiDocument is null!"); return; }
-            VisualElement root = GetComponent<UIDocument>().rootVisualElement;
-            if (root == null) { logger.LogError("root is null!"); return; }
+            throw new NotImplementedException();
+            // TODO: implement uiDocument.enabled = false;?
 
-            root.Clear(); // Remove current UI
-            root = uiDocument.visualTreeAsset.Instantiate(); // Instantiate new UI
-            uiDocument.rootVisualElement.Add(root); // Add new UI
+            /*UIDocument uiDocument = GetComponent<UIDocument>();
+            if (uiDocument == null) { logger.LogError("uiDocument is null!"); return; }
+            VisualElement veMain = GetComponent<UIDocument>().rootVisualElement;
+            if (veMain == null) { logger.LogError("veMain is null!"); return; }
+
+            veMain.Clear(); // Remove current UI
+            veMain = uiDocument.visualTreeAsset.Instantiate(); // Instantiate new UI
+            uiDocument.rootVisualElement.Add(veMain); // Add new UI*/
+        }
+
+        private void BtnSubmitOnClick(ClickEvent evt)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void BtnActivateEyesOnClick(ClickEvent evt)
+        {
+            throw new NotImplementedException();
         }
 
         private void txtPlayerUsernameOnValueChanged(KeyUpEvent evt)
@@ -141,32 +163,22 @@ namespace DeathNote
             logger.LogDebug($"txtPlayerUsernameOnValueChanged: {evt.keyCode}");
             if (evt.keyCode == KeyCode.Return)
             {
-                BtnSubmitOnClick();
+                throw new NotImplementedException();
+                // TODO: implement
             }
         }
 
         private void rootOnKeyUpEvent(KeyUpEvent evt)
         {
+            logger.LogDebug("rootOnKeyUpEvent");
             VisualElement root = GetComponent<UIDocument>().rootVisualElement;
             if (root == null) { logger.LogError("root is null!"); return; }
 
             logger.LogDebug($"rootOnKeyUpEvent: {evt.keyCode}");
-            if (evt.keyCode == KeyCode.Escape && root.style.display == DisplayStyle.Flex)
+            if (evt.keyCode == KeyCode.Escape && root.Q<VisualElement>("veMain").style.display == DisplayStyle.Flex)
             {
-                root.style.display = DisplayStyle.None;
+                HideUI();
             }
-        }
-
-        private void BtnActivateEyesOnClick()
-        {
-            logger.LogDebug("BtnActivateEyesOnClick");
-            throw new NotImplementedException();
-        }
-
-        private void BtnSubmitOnClick()
-        {
-            logger.LogDebug("BtnSubmitOnClick");
-            throw new NotImplementedException();
         }
     }
 }
