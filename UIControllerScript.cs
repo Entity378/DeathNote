@@ -11,6 +11,8 @@ using BepInEx.Logging;
 using UnityEngine.InputSystem.XR;
 using LethalLib.Modules;
 using System.Linq;
+using GameNetcodeStuff;
+using System.Collections;
 
 namespace DeathNote
 {
@@ -21,6 +23,9 @@ namespace DeathNote
         public static UIControllerScript Instance { get; private set; }
         //public VisualElement root;
         public VisualElement veMain;
+        public int timeRemaining = 40;
+        private bool shinigamiEyesActivated = false;
+        private bool verifying = false;
 
         public Label lblResult;
         public TextField txtPlayerUsername;
@@ -28,13 +33,8 @@ namespace DeathNote
         public DropdownField dpdnDeathType;
         public TextField txtTimeOfDeath;
         public ProgressBar pbRemainingTime;
-        //Label lblInstructions;
-        public Label lblInstruction1;
-        public Label lblInstruction2;
-        public Label lblInstruction3;
         //Label lblSETitle;
         public Label lblSEDescription;
-        public Label lblSEWarning;
         public Button btnActivateEyes;
 
         private void Start()
@@ -84,16 +84,9 @@ namespace DeathNote
             if (txtTimeOfDeath == null) { logger.LogError("txtTimeOfDeath not found."); return; }
             pbRemainingTime = root.Q<ProgressBar>("pbRemainingTime");
             if (pbRemainingTime == null) { logger.LogError("pbRemainingTime not found."); return; }
-            lblInstruction1 = root.Q<Label>("lblInstruction1");
-            if (lblInstruction1 == null) { logger.LogError("lblInstruction1 not found."); return; }
-            lblInstruction2 = root.Q<Label>("lblInstruction2");
-            if (lblInstruction2 == null) { logger.LogError("lblInstruction2 not found."); return; }
-            lblInstruction3 = root.Q<Label>("lblInstruction3");
-            if (lblInstruction3 == null) { logger.LogError("lblInstruction3 not found."); return; }
+            pbRemainingTime.highValue = timeRemaining;
             lblSEDescription = root.Q<Label>("lblSEDescription");
             if (lblSEDescription == null) { logger.LogError("lblSEDescription not found."); return; }
-            lblSEWarning = root.Q<Label>("lblSEWarning");
-            if (lblSEWarning == null) { logger.LogError("lblSEWarning not found."); return; }
             btnActivateEyes = root.Q<Button>("btnActivateEyes");
             if (btnActivateEyes == null) { logger.LogError("btnActivateEyes not found."); return; }
 
@@ -102,7 +95,7 @@ namespace DeathNote
             logger.LogDebug("Got Controls for UI");
 
             // Add event handlers
-            btnSubmit.RegisterCallback<ClickEvent>(BtnSubmitOnClick);
+            btnSubmit.clickable.clicked += BtnSubmitOnClick;
             btnActivateEyes.RegisterCallback<ClickEvent>(BtnActivateEyesOnClick);
             txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
 
@@ -112,7 +105,7 @@ namespace DeathNote
         private void Update()
         {
             if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
-            //Instance = this;
+            // TODO: do coroutines in here instead?
         }
 
         public void ShowUI()
@@ -124,6 +117,8 @@ namespace DeathNote
             UnityEngine.Cursor.lockState = CursorLockMode.None;
             UnityEngine.Cursor.visible = true;
             StartOfRound.Instance.localPlayerUsingController = false;
+            IngamePlayerSettings.Instance.playerInput.DeactivateInput();
+            StartOfRound.Instance.localPlayerController.disableLookInput = true;
         }
 
         public void HideUI()
@@ -135,7 +130,8 @@ namespace DeathNote
             UnityEngine.Cursor.lockState = CursorLockMode.Locked; // TODO: patch when escape is pressed to open the quick menu so it doesnt open the pause menu when in the ui
             UnityEngine.Cursor.visible = false;
             StartOfRound.Instance.localPlayerUsingController = false;
-            // playerActions.Movement.Enable();
+            IngamePlayerSettings.Instance.playerInput.ActivateInput();
+            StartOfRound.Instance.localPlayerController.disableLookInput = false;
         }
 
         private void ResetUI()
@@ -154,26 +150,90 @@ namespace DeathNote
             uiDocument.rootVisualElement.Add(veMain); // Add new UI*/
         }
 
-        private void BtnSubmitOnClick(ClickEvent evt)
+        private void BtnSubmitOnClick()
         {
+            if (verifying)
+            {
+                // TODO: For when you press submit the second time, locking it in and adding it to the second page
+
+                return;
+            }
+
             logger.LogDebug("BtnSubmitOnClick");
-            throw new NotImplementedException();
+            ShowResults("Searching for player to kill...", 5f, true); // TODO: TEMP FOR TESTING DELETE ME
+
+            string name = txtPlayerUsername.text;
+            logger.LogDebug($"Got name: {name}");
+            
+            DeathController.PlayerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == name).FirstOrDefault();
+
+            if (DeathController.PlayerToDie == null) // TODO: TEMP FOR TESTING CHANGE BACK TO !=
+            {
+                //if (DeathController.PlayerToDie.isPlayerDead) { return; } // TODO: DISABLED FOR TESTING
+                //logger.LogDebug($"Found player to kill: {DeathController.PlayerToDie.playerUsername}"); // TODO: DISABLED FOR TESTING
+                //DeathController.KillPlayer();
+                //ShowResults($"Found player to kill: {DeathController.PlayerToDie.playerUsername}\nThey will die from a heart attack in 40 seconds.");
+                txtPlayerUsername.isReadOnly = true;
+                dpdnDeathType.style.display = DisplayStyle.Flex;
+                txtTimeOfDeath.style.display = DisplayStyle.Flex;
+                pbRemainingTime.style.display = DisplayStyle.Flex;
+                
+                verifying = true;
+                // TODO: Continue here
+            }
+        }
+
+        private void txtPlayerUsernameOnValueChanged(KeyUpEvent evt) // THIS IS DONE
+        {
+            //logger.LogDebug($"txtPlayerUsernameOnValueChanged: {evt.keyCode}");
+            if (evt.keyCode == KeyCode.Return)
+            {
+                BtnSubmitOnClick();
+            }
+        }
+
+        public void ShowResults(string message, float duration = 3f, bool flash = false)
+        {
+            lblResult.text = message;
+            StartCoroutine(ShowResultsCoroutine(message, duration, flash));
+        }
+        private IEnumerator ShowResultsCoroutine(string message, float duration, bool flash)
+        {
+            float endTime = Time.time + duration;
+            bool isRed = true;
+
+            if (flash == true)
+            {
+                while (Time.time < endTime)
+                {
+                    if (isRed)
+                    {
+                        lblResult.style.color = Color.black;
+                    }
+                    else
+                    {
+                        lblResult.style.color = Color.red;
+                    }
+
+                    isRed = !isRed;
+
+                    yield return new WaitForSeconds(0.75f);
+                }
+            }
+            else
+            {
+                yield return new WaitForSeconds(duration);
+            }
+
+
+            lblResult.style.color = Color.red;
+            lblResult.text = "";
         }
 
         private void BtnActivateEyesOnClick(ClickEvent evt)
         {
             logger.LogDebug("BtnActivateEyesOnClick");
             throw new NotImplementedException();
-        }
-
-        private void txtPlayerUsernameOnValueChanged(KeyUpEvent evt)
-        {
-            logger.LogDebug($"txtPlayerUsernameOnValueChanged: {evt.keyCode}");
-            if (evt.keyCode == KeyCode.Return)
-            {
-                throw new NotImplementedException();
-                // TODO: implement
-            }
         }
     }
 }

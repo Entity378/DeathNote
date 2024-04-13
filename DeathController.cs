@@ -2,6 +2,7 @@
 using BepInEx.Logging;
 using DeathNote;
 using GameNetcodeStuff;
+using LethalLib.Modules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,7 +92,9 @@ namespace DeathNote
 
         public static void KillPlayer()
         {
+            // TODO: implement
 
+            NetworkHandler.clientMessage.SendServer(PlayerToDie.actualClientId);
         }
 
         public static void GetEnemy()

@@ -20,7 +20,7 @@ namespace DeathNote
     {
         private const string modGUID = "Snowlance.DeathNote";
         private const string modName = "DeathNote";
-        private const string modVersion = "0.1.0";
+        private const string modVersion = "0.2.0";
 
         public static AssetBundle? DNAssetBundle;
 
