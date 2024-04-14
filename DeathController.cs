@@ -15,15 +15,11 @@ namespace DeathNote
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
-        public static PlayerControllerB? PlayerToDie;
-        public static string? CauseOfDeathString;
-        private static CauseOfDeath CauseOfDeath;
-
-
         public static List<string> GetCauseOfDeathsAsStrings()
         {
             List<string> deathType = new List<string>();
 
+            deathType.Add(CauseOfDeath.Unknown.ToString());
             deathType.Add(CauseOfDeath.Abandoned.ToString());
             deathType.Add(CauseOfDeath.Blast.ToString());
             deathType.Add(CauseOfDeath.Bludgeoning.ToString());
@@ -36,14 +32,15 @@ namespace DeathNote
             deathType.Add(CauseOfDeath.Mauling.ToString());
             deathType.Add(CauseOfDeath.Strangulation.ToString());
             deathType.Add(CauseOfDeath.Suffocation.ToString());
+
             return deathType;
         }
 
-        public static void GetCauseOfDeath()
+        public static CauseOfDeath GetCauseOfDeath(string causeOfDeathString) // TODO: might need to add Unknown to list as default value
         {
-            CauseOfDeath causeOfDeath;
-
-            switch (CauseOfDeathString.ToLower())
+            CauseOfDeath causeOfDeath = CauseOfDeath.Unknown;
+            
+            switch (causeOfDeathString.ToLower())
             {
                 case "abandoned":
                     causeOfDeath = CauseOfDeath.Abandoned;
@@ -81,24 +78,24 @@ namespace DeathNote
                 case "suffocation":
                     causeOfDeath = CauseOfDeath.Suffocation;
                     break;
-                default:
-                    logger.LogDebug("Cant find type of death...");
-
-                    return;
+                case "unknown":
+                    causeOfDeath = CauseOfDeath.Unknown;
+                    break;
             }
 
             logger.LogDebug($"Got cause of death: {causeOfDeath}");
+            return causeOfDeath;
         }
 
-        public static void KillPlayer()
+        public static void KillPlayer(PlayerControllerB playerToDie, CauseOfDeath causeOfDeath)
         {
-            // TODO: implement
-
-            NetworkHandler.clientMessage.SendServer(PlayerToDie.actualClientId);
+            playerToDie.causeOfDeath = causeOfDeath;
+            NetworkHandler.clientMessage.SendServer(playerToDie.actualClientId);
         }
 
         public static void GetEnemy()
         {
+            // TODO: implement, might not be needed
             //public List<EnemyAI> SpawnedEnemies = new List<EnemyAI>();
         }
 

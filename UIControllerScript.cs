@@ -27,6 +27,9 @@ namespace DeathNote
         private bool shinigamiEyesActivated = false;
         private bool verifying = false;
 
+        //private List<PlayerToDie> PlayersToDie;
+
+
         public Label lblResult;
         public TextField txtPlayerUsername;
         public Button btnSubmit;
@@ -46,6 +49,7 @@ namespace DeathNote
                 Instance = this;
             }
 
+            //PlayersToDie = new List<PlayerToDie>();
 
             // Get UIDocument
             logger.LogDebug("Getting UIDocument");
@@ -74,24 +78,44 @@ namespace DeathNote
             // Find elements
             lblResult = root.Q<Label>("lblResult");
             if (lblResult == null) { logger.LogError("lblResult not found."); return; }
+
             txtPlayerUsername = root.Q<TextField>("txtPlayerUsername");
             if (txtPlayerUsername == null) { logger.LogError("txtPlayerUsername not found."); return; }
+
             btnSubmit = root.Q<Button>("btnSubmit");
             if (btnSubmit == null) { logger.LogError("btnSubmit not found."); return; }
+
             dpdnDeathType = root.Q<DropdownField>("dpdnDeathType");
             if (dpdnDeathType == null) { logger.LogError("dpdnDeathType not found."); return; }
+            dpdnDeathType.choices = DeathController.GetCauseOfDeathsAsStrings();
+            dpdnDeathType.index = 0;
+
             txtTimeOfDeath = root.Q<TextField>("txtTimeOfDeath");
             if (txtTimeOfDeath == null) { logger.LogError("txtTimeOfDeath not found."); return; }
+
             pbRemainingTime = root.Q<ProgressBar>("pbRemainingTime");
             if (pbRemainingTime == null) { logger.LogError("pbRemainingTime not found."); return; }
             pbRemainingTime.highValue = timeRemaining;
+
             lblSEDescription = root.Q<Label>("lblSEDescription");
             if (lblSEDescription == null) { logger.LogError("lblSEDescription not found."); return; }
+
             btnActivateEyes = root.Q<Button>("btnActivateEyes");
             if (btnActivateEyes == null) { logger.LogError("btnActivateEyes not found."); return; }
 
-            // Set up controls
-            dpdnDeathType.choices = new List<string>() { "Abandoned", "Blast", "Bludgeoning", "Crushing", "Drowning", "Electrocution", "Gravity", "Gunshots", "Kicking", "Mauling", "Strangulation", "Suffocation" };
+            txtTimeOfDeath = root.Q<TextField>("txtTimeOfDeath");
+            if (txtTimeOfDeath == null) { logger.LogError("txtTimeOfDeath not found."); return; }
+
+            pbRemainingTime = root.Q<ProgressBar>("pbRemainingTime");
+            if (pbRemainingTime == null) { logger.LogError("pbRemainingTime not found."); return; }
+            pbRemainingTime.highValue = timeRemaining;
+
+            lblSEDescription = root.Q<Label>("lblSEDescription");
+            if (lblSEDescription == null) { logger.LogError("lblSEDescription not found."); return; }
+
+            btnActivateEyes = root.Q<Button>("btnActivateEyes");
+            if (btnActivateEyes == null) { logger.LogError("btnActivateEyes not found."); return; }
+
             logger.LogDebug("Got Controls for UI");
 
             // Add event handlers
@@ -100,12 +124,27 @@ namespace DeathNote
             txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
 
             logger.LogDebug("UIControllerScript: Start() complete");
+
+            // TODO: Testing stuff
+            txtTimeOfDeath.style.display = DisplayStyle.Flex;
         }
 
         private void Update()
         {
             if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
             // TODO: do coroutines in here instead?
+            // TODO: Testing stuff
+            if (verifying)
+            {
+                string time = HUDManager.Instance.clockNumber.text;
+                float normalizedTimeOfDay = TimeOfDay.Instance.normalizedTimeOfDay;
+                float globalTime = TimeOfDay.Instance.globalTime;
+                float totalTime = TimeOfDay.Instance.totalTime;
+                float numberofhours = TimeOfDay.Instance.numberOfHours;
+
+                lblResult.text = time + " || " + normalizedTimeOfDay + " || " + globalTime + " || " + totalTime + " || " + numberofhours;
+            }
+            
         }
 
         public void ShowUI()
@@ -134,7 +173,7 @@ namespace DeathNote
             StartOfRound.Instance.localPlayerController.disableLookInput = false;
         }
 
-        private void ResetUI()
+        private void ResetUI() // TODO: might not be needed
         {
             logger.LogDebug("ResetUI");
             throw new NotImplementedException();
@@ -150,36 +189,104 @@ namespace DeathNote
             uiDocument.rootVisualElement.Add(veMain); // Add new UI*/
         }
 
+        private void StartKillTimer()
+        {
+            throw new NotImplementedException();
+        }
+        private IEnumerator StartKillTimerCoroutine()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void StartProgressBarTimer()
+        {
+            throw new NotImplementedException();
+            StartCoroutine(StartProgressBarTimerCoroutine());
+        }
+        private IEnumerator StartProgressBarTimerCoroutine()
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool testisNormalized = false;
         private void BtnSubmitOnClick()
         {
-            if (verifying)
-            {
-                // TODO: For when you press submit the second time, locking it in and adding it to the second page
+            logger.LogDebug("BtnSubmitOnClick");
 
+            string time = HUDManager.Instance.clockNumber.text;
+            float normalizedTimeOfDay = TimeOfDay.Instance.normalizedTimeOfDay;
+            float globalTime = TimeOfDay.Instance.globalTime;
+            float totalTime = TimeOfDay.Instance.totalTime;
+            float numberofhours = TimeOfDay.Instance.numberOfHours;
+
+            if (testisNormalized)
+            {
+                txtTimeOfDeath.value = NormalizedTimeToClock(float.Parse(txtTimeOfDeath.text), numberofhours);
+                testisNormalized = false;
                 return;
             }
 
-            logger.LogDebug("BtnSubmitOnClick");
-            ShowResults("Searching for player to kill...", 5f, true); // TODO: TEMP FOR TESTING DELETE ME
+            string txtTime = txtTimeOfDeath.text;
 
-            string name = txtPlayerUsername.text;
-            logger.LogDebug($"Got name: {name}");
-            
-            DeathController.PlayerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == name).FirstOrDefault();
+            txtTimeOfDeath.value = ClockToNormalizedTime(txtTime).ToString();
 
-            if (DeathController.PlayerToDie == null) // TODO: TEMP FOR TESTING CHANGE BACK TO !=
+            testisNormalized = true;
+
+            return;
+
+            if (!string.IsNullOrEmpty(time))
             {
-                //if (DeathController.PlayerToDie.isPlayerDead) { return; } // TODO: DISABLED FOR TESTING
-                //logger.LogDebug($"Found player to kill: {DeathController.PlayerToDie.playerUsername}"); // TODO: DISABLED FOR TESTING
-                //DeathController.KillPlayer();
-                //ShowResults($"Found player to kill: {DeathController.PlayerToDie.playerUsername}\nThey will die from a heart attack in 40 seconds.");
+                //string myString = "Your string\n with new lines and spaces";
+                //myString = myString.Replace(" ", ""); // Removes all spaces
+                //myString = myString.Replace("\n", ""); // Removes all newlines
+
+
+                // time = "00:00:00";
+                // timeNormalized = is a float that goes up and is a number between 0 and 1;
+                // globalTime is a float that starts at 100 and goes up
+                // total time is a constant that shows the total time in a day
+                // number of hours is a constant that shows the number of hours in a day
+                lblResult.text = time + " || " + normalizedTimeOfDay + " || " + globalTime + " || " + totalTime + " || " + numberofhours;
+                //if (time == "00:00:00") { ShowResults("Time's up!"); } // TODO: TEMP FOR TESTING
+                
+                // normalizedTimeOfDay = currentDayTime / totalTime;
+
+            }
+
+            return; // TODO: TEMP FOR TESTING
+
+            if (verifying)
+            {
+                // TODO: For when you press submit the second time, locking it in and adding it to the second page
+                verifying = false;
+                return;
+            }
+
+            ShowResults("Searching for player to kill...", 5f, true); // TODO: TEMP FOR TESTING DELETE ME
+            
+            PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == txtPlayerUsername.text.ToLower()).FirstOrDefault();
+
+            if (playerToDie != null) // TODO: TEMP FOR TESTING CHANGE BACK TO !=
+            {
+                if (playerToDie.isPlayerDead) { ShowResults("Player is already dead"); return; }
+                logger.LogDebug($"Found player to kill: {playerToDie.playerUsername}"); // TODO: DISABLED FOR TESTING
+                ShowResults($"Found player to kill: {playerToDie.playerUsername}");
+                
                 txtPlayerUsername.isReadOnly = true;
                 dpdnDeathType.style.display = DisplayStyle.Flex;
+                dpdnDeathType.index = 0;
                 txtTimeOfDeath.style.display = DisplayStyle.Flex;
+                txtTimeOfDeath.value = "";
                 pbRemainingTime.style.display = DisplayStyle.Flex;
+                pbRemainingTime.value = 0;
                 
                 verifying = true;
+                StartProgressBarTimer();
                 // TODO: Continue here
+            }
+            else
+            {
+                ShowResults("Could not find player to kill");
             }
         }
 
@@ -190,6 +297,78 @@ namespace DeathNote
             {
                 BtnSubmitOnClick();
             }
+        }
+
+        public string NormalizedTimeToClock(float timeNormalized, float numberOfHours) // TODO: This works but doesnt get the right values and same with the reverse method
+        {
+            string amPM;
+            int num = (int)(timeNormalized * (60f * numberOfHours)) + 360;
+            int num2 = (int)Mathf.Floor(num / 60);
+
+            if (num2 >= 24)
+            {
+                return "12:00AM";
+            }
+            if (num2 < 12)
+            {
+                amPM = "AM";
+            }
+            else
+            {
+                amPM = "PM";
+            }
+            if (num2 > 12)
+            {
+                num2 %= 12;
+            }
+            int num3 = num % 60;
+            string text = $"{num2:00}:{num3:00}".TrimStart('0') + amPM;
+            return text;
+        }
+
+        public float ClockToNormalizedTime(string time)
+        {
+            // TODO: do error checking
+            // Change to upper case
+            time = time.ToUpper();
+
+            // Take out all spaces and newlines
+            time = time.Replace(" ", ""); // Removes all spaces
+            time = time.Replace("\n", ""); // Removes all newlines
+
+            // Separate the period from the time
+            string period = time.Substring(time.Length - 2).Trim();
+            time = time.Remove(time.Length - 2);
+            logger.LogDebug($"time: {time}");
+            logger.LogDebug($"period: {period}");
+            
+
+            // Convert the hour and minute values to integers
+            string[] hoursAndMinutes = time.Split(':');
+            int hours = int.Parse(hoursAndMinutes[0]);
+            int minutes = int.Parse(hoursAndMinutes[1]);
+
+            // Normalise to 24-hour format if time is PM
+            if (period == "PM" && hours != 12)
+            {
+                hours += 12;
+            }
+            else if (period == "AM" && hours == 12)
+            {
+                hours = 0;
+            }
+
+            // Calculate the total minutes
+            int totalMinutes = (hours * 60) + minutes;
+
+            // Subtract the offset of 360 minutes (6 hours)
+            totalMinutes -= 360;
+
+            // Divide the total minutes by the total minutes of numberOfHours to get the normalized time value
+            float timeNormalized = totalMinutes / (60f * 24f); // assuming the numberOfHours is 24
+
+            
+            return timeNormalized;
         }
 
         public void ShowResults(string message, float duration = 3f, bool flash = false)
@@ -232,8 +411,14 @@ namespace DeathNote
 
         private void BtnActivateEyesOnClick(ClickEvent evt)
         {
+            if (verifying)
+            {
+                verifying = false;
+            }
+            else { verifying = true; }
+
             logger.LogDebug("BtnActivateEyesOnClick");
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
     }
 }

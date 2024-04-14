@@ -38,7 +38,7 @@ namespace DeathNote
                     if (playerToDie != null)
                     {
                         logger.LogDebug($"Found player to kill: {playerToDie.playerUsername}"); // IT WORKS UP TO HERE!
-                        DeathController.PlayerToDie = playerToDie;
+                        //DeathController.PlayerToDie = playerToDie;
 
                         ResetTextbox(__instance, localPlayer);
                         return false;
