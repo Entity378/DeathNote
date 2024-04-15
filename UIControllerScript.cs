@@ -13,6 +13,7 @@ using LethalLib.Modules;
 using System.Linq;
 using GameNetcodeStuff;
 using System.Collections;
+using TMPro;
 
 namespace DeathNote
 {
@@ -142,7 +143,7 @@ namespace DeathNote
                 float totalTime = TimeOfDay.Instance.totalTime;
                 float numberofhours = TimeOfDay.Instance.numberOfHours;
 
-                lblResult.text = time + " || " + normalizedTimeOfDay + " || " + globalTime + " || " + totalTime + " || " + numberofhours;
+                lblResult.text = time + " || " + normalizedTimeOfDay.ToString("F20") + " || " + globalTime + " || " + totalTime + " || " + numberofhours;
             }
             
         }
@@ -213,28 +214,23 @@ namespace DeathNote
         {
             logger.LogDebug("BtnSubmitOnClick");
 
-            string time = HUDManager.Instance.clockNumber.text;
-            float normalizedTimeOfDay = TimeOfDay.Instance.normalizedTimeOfDay;
-            float globalTime = TimeOfDay.Instance.globalTime;
-            float totalTime = TimeOfDay.Instance.totalTime;
-            float numberofhours = TimeOfDay.Instance.numberOfHours;
+            //string time = HUDManager.Instance.clockNumber.text;
+            //float normalizedTimeOfDay = TimeOfDay.Instance.normalizedTimeOfDay;
 
             if (testisNormalized)
             {
-                txtTimeOfDeath.value = NormalizedTimeToClock(float.Parse(txtTimeOfDeath.text), numberofhours);
+                txtTimeOfDeath.value = TimeToClock(float.Parse(txtTimeOfDeath.text), TimeOfDay.Instance.numberOfHours);
                 testisNormalized = false;
-                return;
             }
-
-            string txtTime = txtTimeOfDeath.text;
-
-            txtTimeOfDeath.value = ClockToNormalizedTime(txtTime).ToString();
-
-            testisNormalized = true;
+            else
+            {
+                txtTimeOfDeath.value = ClockToTime(txtTimeOfDeath.text).ToString();
+                testisNormalized = true;
+            }
 
             return;
 
-            if (!string.IsNullOrEmpty(time))
+            /*if (!string.IsNullOrEmpty(time))
             {
                 //string myString = "Your string\n with new lines and spaces";
                 //myString = myString.Replace(" ", ""); // Removes all spaces
@@ -251,7 +247,7 @@ namespace DeathNote
                 
                 // normalizedTimeOfDay = currentDayTime / totalTime;
 
-            }
+            }*/
 
             return; // TODO: TEMP FOR TESTING
 
@@ -299,12 +295,14 @@ namespace DeathNote
             }
         }
 
-        public string NormalizedTimeToClock(float timeNormalized, float numberOfHours) // TODO: This works but doesnt get the right values and same with the reverse method
+        public string TimeToClock(float timeNormalized, float numberOfHours) // THIS WORKS
         {
-            string amPM;
             int num = (int)(timeNormalized * (60f * numberOfHours)) + 360;
+            logger.LogDebug($"num: {num}");
             int num2 = (int)Mathf.Floor(num / 60);
+            logger.LogDebug($"num2: {num2}");
 
+            string amPM = "AM";
             if (num2 >= 24)
             {
                 return "12:00AM";
@@ -320,56 +318,49 @@ namespace DeathNote
             if (num2 > 12)
             {
                 num2 %= 12;
+                logger.LogDebug($"num2 changed: {num2}");
             }
             int num3 = num % 60;
+            logger.LogDebug($"num3: {num3}");
             string text = $"{num2:00}:{num3:00}".TrimStart('0') + amPM;
             return text;
         }
 
-        public float ClockToNormalizedTime(string time)
+        public float ClockToTime(string timeString) // doesnt work
         {
-            // TODO: do error checking
-            // Change to upper case
-            time = time.ToUpper();
+            int numberOfHours = TimeOfDay.Instance.numberOfHours;
+            float lengthOfHours = TimeOfDay.Instance.lengthOfHours;
+            float totalTime = TimeOfDay.Instance.totalTime;
 
-            // Take out all spaces and newlines
-            time = time.Replace(" ", ""); // Removes all spaces
-            time = time.Replace("\n", ""); // Removes all newlines
+            int startHour = (24 - numberOfHours);
 
-            // Separate the period from the time
-            string period = time.Substring(time.Length - 2).Trim();
-            time = time.Remove(time.Length - 2);
-            logger.LogDebug($"time: {time}");
-            logger.LogDebug($"period: {period}");
-            
+            // Split the time string into hours, minutes, and AM/PM
+            string[] timeParts = timeString.Split(':');
+            int hours = int.Parse(timeParts[0]);
+            int minutes = int.Parse(timeParts[1].Substring(0, 2)); // Extract minutes
+            string amPm = timeParts[1].Substring(2); // Extract AM/PM
 
-            // Convert the hour and minute values to integers
-            string[] hoursAndMinutes = time.Split(':');
-            int hours = int.Parse(hoursAndMinutes[0]);
-            int minutes = int.Parse(hoursAndMinutes[1]);
-
-            // Normalise to 24-hour format if time is PM
-            if (period == "PM" && hours != 12)
+            // Convert hours to 24-hour format
+            if (amPm == "PM")
             {
                 hours += 12;
             }
-            else if (period == "AM" && hours == 12)
+            else if (amPm == "AM" && hours == 12)
             {
                 hours = 0;
             }
 
-            // Calculate the total minutes
-            int totalMinutes = (hours * 60) + minutes;
 
-            // Subtract the offset of 360 minutes (6 hours)
-            totalMinutes -= 360;
+            // Calculate the total number of minutes
+            hours = hours - startHour;
+            float totalMinutes = (hours * lengthOfHours) + minutes;
 
-            // Divide the total minutes by the total minutes of numberOfHours to get the normalized time value
-            float timeNormalized = totalMinutes / (60f * 24f); // assuming the numberOfHours is 24
+            // Convert total minutes to normalized time
+            float normalizedTime = totalMinutes / totalTime; // Assuming 24-hour day
 
-            
-            return timeNormalized;
-        }
+            return normalizedTime;
+        } // TODO: THIS IS THE SOLUTION: // normalizedTimeOfDay = currentDayTime / totalTime;
+
 
         public void ShowResults(string message, float duration = 3f, bool flash = false)
         {
