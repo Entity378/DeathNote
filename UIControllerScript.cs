@@ -22,14 +22,13 @@ namespace DeathNote
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
         public static UIControllerScript Instance { get; private set; }
-        //public VisualElement root;
         public VisualElement veMain;
-        public int timeRemaining = 40;
-        private bool shinigamiEyesActivated = false;
+        public int timeRemaining = 40; // TODO: get this from config
         private bool verifying = false;
 
-        //private List<PlayerToDie> PlayersToDie;
+        
 
+        //private List<PlayerToDie> PlayersToDie;
 
         public Label lblResult;
         public TextField txtPlayerUsername;
@@ -37,7 +36,6 @@ namespace DeathNote
         public DropdownField dpdnDeathType;
         public TextField txtTimeOfDeath;
         public ProgressBar pbRemainingTime;
-        //Label lblSETitle;
         public Label lblSEDescription;
         public Button btnActivateEyes;
 
@@ -54,12 +52,11 @@ namespace DeathNote
 
             // Get UIDocument
             logger.LogDebug("Getting UIDocument");
-            UIDocument uiDocument = GetComponent<UIDocument>(); // TODO: might need to enable or something
+            UIDocument uiDocument = GetComponent<UIDocument>();
             if (uiDocument == null) { logger.LogError("uiDocument not found."); return; }
 
             // Get VisualTreeAsset
             logger.LogDebug("Getting visual tree asset");
-            //uiDocument.visualTreeAsset = DNAssetBundle.LoadAsset<VisualTreeAsset>("Assets/DeathNote/DeathnoteUI.uxml");
             if (uiDocument.visualTreeAsset == null) { logger.LogError("visualTreeAsset not found."); return; }
             
             // Instantiate root
@@ -74,7 +71,6 @@ namespace DeathNote
             veMain = uiDocument.rootVisualElement.Q<VisualElement>("veMain");
             veMain.style.display = DisplayStyle.None;
             if (veMain == null) { logger.LogError("veMain not found."); return; }
-            //logger.LogMessage($"display: {veMain.style.display}");
 
             // Find elements
             lblResult = root.Q<Label>("lblResult");
@@ -125,33 +121,16 @@ namespace DeathNote
             txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
 
             logger.LogDebug("UIControllerScript: Start() complete");
-
-            // TODO: Testing stuff
-            txtTimeOfDeath.style.display = DisplayStyle.Flex;
         }
 
         private void Update()
         {
             if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
-            // TODO: do coroutines in here instead?
-            // TODO: Testing stuff
-            if (verifying)
-            {
-                string time = HUDManager.Instance.clockNumber.text;
-                float normalizedTimeOfDay = TimeOfDay.Instance.normalizedTimeOfDay;
-                float globalTime = TimeOfDay.Instance.globalTime;
-                float totalTime = TimeOfDay.Instance.totalTime;
-                float numberofhours = TimeOfDay.Instance.numberOfHours;
-
-                lblResult.text = time + " || " + normalizedTimeOfDay.ToString("F20") + " || " + globalTime + " || " + totalTime + " || " + numberofhours;
-            }
-            
         }
 
         public void ShowUI()
         {
             logger.LogDebug("Showing UI");
-            //VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
             veMain.style.display = DisplayStyle.Flex;
 
             UnityEngine.Cursor.lockState = CursorLockMode.None;
@@ -164,17 +143,16 @@ namespace DeathNote
         public void HideUI()
         {
             logger.LogDebug("Hiding UI");
-            //VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
             veMain.style.display = DisplayStyle.None;
 
-            UnityEngine.Cursor.lockState = CursorLockMode.Locked; // TODO: patch when escape is pressed to open the quick menu so it doesnt open the pause menu when in the ui
+            UnityEngine.Cursor.lockState = CursorLockMode.Locked;
             UnityEngine.Cursor.visible = false;
             StartOfRound.Instance.localPlayerUsingController = false;
             IngamePlayerSettings.Instance.playerInput.ActivateInput();
             StartOfRound.Instance.localPlayerController.disableLookInput = false;
         }
 
-        private void ResetUI() // TODO: might not be needed
+        private void ResetUI1() // TODO: might not be needed
         {
             logger.LogDebug("ResetUI");
             throw new NotImplementedException();
@@ -190,83 +168,71 @@ namespace DeathNote
             uiDocument.rootVisualElement.Add(veMain); // Add new UI*/
         }
 
-        private void StartKillTimer()
+        private void ResetUI()
         {
-            throw new NotImplementedException();
+            txtPlayerUsername.value = "";
+            txtPlayerUsername.isReadOnly = false;
+            dpdnDeathType.style.display = DisplayStyle.None;
+            dpdnDeathType.index = 0;
+            txtTimeOfDeath.style.display = DisplayStyle.None;
+            txtTimeOfDeath.value = "";
+            pbRemainingTime.style.display = DisplayStyle.Flex;
+            pbRemainingTime.value = 0;
+
+            verifying = false;
+        }
+
+        private void StartKillTimer(DeathController deathController) // TODO: MAIN TIMER, WILL BE A LOT
+        {
+            deathController.causeOfDeath = DeathController.GetCauseOfDeathFromString(dpdnDeathType.value);
+            // TODO: Make sure all these changes work and continue here, get timeofdeath next
         }
         private IEnumerator StartKillTimerCoroutine()
         {
             throw new NotImplementedException();
         }
 
-        private void StartProgressBarTimer()
+        private void StartProgressBarTimer(DeathController deathController)
         {
-            throw new NotImplementedException();
-            StartCoroutine(StartProgressBarTimerCoroutine());
+            StartCoroutine(StartProgressBarTimerCoroutine(deathController));
         }
-        private IEnumerator StartProgressBarTimerCoroutine()
+        private IEnumerator StartProgressBarTimerCoroutine(DeathController deathController)
         {
-            throw new NotImplementedException();
+            while (TimeOfDay.Instance.normalizedTimeOfDay < pbRemainingTime.highValue)
+            {
+                pbRemainingTime.value = TimeOfDay.Instance.normalizedTimeOfDay;
+                yield return new WaitForSeconds(Time.deltaTime);
+            }
+
+            StartKillTimer(deathController);
         }
 
-        private bool testisNormalized = false;
         private void BtnSubmitOnClick()
         {
+            // normalizedTime = currentDayTime / totalTime;
             logger.LogDebug("BtnSubmitOnClick");
-
-            //string time = HUDManager.Instance.clockNumber.text;
-            //float normalizedTimeOfDay = TimeOfDay.Instance.normalizedTimeOfDay;
-
-            if (testisNormalized)
-            {
-                txtTimeOfDeath.value = TimeToClock(float.Parse(txtTimeOfDeath.text), TimeOfDay.Instance.numberOfHours);
-                testisNormalized = false;
-            }
-            else
-            {
-                txtTimeOfDeath.value = ClockToTime(txtTimeOfDeath.text).ToString();
-                testisNormalized = true;
-            }
-
-            return;
-
-            /*if (!string.IsNullOrEmpty(time))
-            {
-                //string myString = "Your string\n with new lines and spaces";
-                //myString = myString.Replace(" ", ""); // Removes all spaces
-                //myString = myString.Replace("\n", ""); // Removes all newlines
-
-
-                // time = "00:00:00";
-                // timeNormalized = is a float that goes up and is a number between 0 and 1;
-                // globalTime is a float that starts at 100 and goes up
-                // total time is a constant that shows the total time in a day
-                // number of hours is a constant that shows the number of hours in a day
-                lblResult.text = time + " || " + normalizedTimeOfDay + " || " + globalTime + " || " + totalTime + " || " + numberofhours;
-                //if (time == "00:00:00") { ShowResults("Time's up!"); } // TODO: TEMP FOR TESTING
-                
-                // normalizedTimeOfDay = currentDayTime / totalTime;
-
-            }*/
-
-            return; // TODO: TEMP FOR TESTING
 
             if (verifying)
             {
-                // TODO: For when you press submit the second time, locking it in and adding it to the second page
+
+
+                // TODO: For when you press submit the second time, locking it in and adding it to the second page. make sure to parse everything and showresults if they are wrong
                 verifying = false;
                 return;
             }
 
-            ShowResults("Searching for player to kill...", 5f, true); // TODO: TEMP FOR TESTING DELETE ME
+            ShowResults("Searching for player to kill...", 0.5f); // TODO: TEMP FOR TESTING DELETE ME
             
             PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == txtPlayerUsername.text.ToLower()).FirstOrDefault();
 
             if (playerToDie != null) // TODO: TEMP FOR TESTING CHANGE BACK TO !=
             {
                 if (playerToDie.isPlayerDead) { ShowResults("Player is already dead"); return; }
-                logger.LogDebug($"Found player to kill: {playerToDie.playerUsername}"); // TODO: DISABLED FOR TESTING
+                logger.LogDebug($"Found player to kill: {playerToDie.playerUsername}");
                 ShowResults($"Found player to kill: {playerToDie.playerUsername}");
+
+                DeathController deathController = new DeathController();
+                deathController.PlayerToDie = playerToDie;
                 
                 txtPlayerUsername.isReadOnly = true;
                 dpdnDeathType.style.display = DisplayStyle.Flex;
@@ -275,10 +241,15 @@ namespace DeathNote
                 txtTimeOfDeath.value = "";
                 pbRemainingTime.style.display = DisplayStyle.Flex;
                 pbRemainingTime.value = 0;
-                
+
+                pbRemainingTime.lowValue = TimeOfDay.Instance.normalizedTimeOfDay;
+                pbRemainingTime.highValue = (TimeOfDay.Instance.currentDayTime + timeRemaining) / TimeOfDay.Instance.totalTime;
+                txtTimeOfDeath.value = NormalizedToClock(pbRemainingTime.highValue);
                 verifying = true;
-                StartProgressBarTimer();
-                // TODO: Continue here
+                StartProgressBarTimer(deathController); // TODO: implement
+
+
+                // TODO: Continue here?
             }
             else
             {
@@ -286,17 +257,17 @@ namespace DeathNote
             }
         }
 
-        private void txtPlayerUsernameOnValueChanged(KeyUpEvent evt) // THIS IS DONE
+        private void txtPlayerUsernameOnValueChanged(KeyUpEvent evt)
         {
-            //logger.LogDebug($"txtPlayerUsernameOnValueChanged: {evt.keyCode}");
             if (evt.keyCode == KeyCode.Return)
             {
                 BtnSubmitOnClick();
             }
         }
 
-        public string TimeToClock(float timeNormalized, float numberOfHours) // THIS WORKS
+        public string NormalizedToClock(float timeNormalized) // THIS WORKS
         {
+            int numberOfHours = TimeOfDay.Instance.numberOfHours;
             int num = (int)(timeNormalized * (60f * numberOfHours)) + 360;
             logger.LogDebug($"num: {num}");
             int num2 = (int)Mathf.Floor(num / 60);
@@ -326,8 +297,10 @@ namespace DeathNote
             return text;
         }
 
-        public float ClockToTime(string timeString) // doesnt work
+        public float ClockToNormalized(string timeString) // THIS WORKS DONT TOUCH FOR THE LOVE OF GOD
         {
+            timeString = timeString.ToUpper().Replace(" ", "").Replace("\n", "");
+
             int numberOfHours = TimeOfDay.Instance.numberOfHours;
             float lengthOfHours = TimeOfDay.Instance.lengthOfHours;
             float totalTime = TimeOfDay.Instance.totalTime;
@@ -356,11 +329,11 @@ namespace DeathNote
             float totalMinutes = (hours * lengthOfHours) + minutes;
 
             // Convert total minutes to normalized time
+            // normalizedTime = currentDayTime / totalTime;
             float normalizedTime = totalMinutes / totalTime; // Assuming 24-hour day
 
             return normalizedTime;
-        } // TODO: THIS IS THE SOLUTION: // normalizedTimeOfDay = currentDayTime / totalTime;
-
+        }
 
         public void ShowResults(string message, float duration = 3f, bool flash = false)
         {

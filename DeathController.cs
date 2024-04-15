@@ -11,9 +11,17 @@ using UnityEngine;
 
 namespace DeathNote
 {
-    public static class DeathController
+    public class DeathController
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
+
+        public static bool ShinigamiEyesActivated = false;
+
+        public PlayerControllerB PlayerToDie;
+        public CauseOfDeath causeOfDeath;
+
+        public string TimeOfDeathString;
+        public float TimeOfDeath;
 
         public static List<string> GetCauseOfDeathsAsStrings()
         {
@@ -36,61 +44,61 @@ namespace DeathNote
             return deathType;
         }
 
-        public static CauseOfDeath GetCauseOfDeath(string causeOfDeathString) // TODO: might need to add Unknown to list as default value
+        public static CauseOfDeath GetCauseOfDeathFromString(string causeOfDeathString) // TODO: might need to add Unknown to list as default value
         {
-            CauseOfDeath causeOfDeath = CauseOfDeath.Unknown;
+            CauseOfDeath _causeOfDeath = CauseOfDeath.Unknown;
             
             switch (causeOfDeathString.ToLower())
             {
                 case "abandoned":
-                    causeOfDeath = CauseOfDeath.Abandoned;
+                    _causeOfDeath = CauseOfDeath.Abandoned;
                     break;
                 case "blast":
-                    causeOfDeath = CauseOfDeath.Blast;
+                    _causeOfDeath = CauseOfDeath.Blast;
                     break;
                 case "bludgeoning":
-                    causeOfDeath = CauseOfDeath.Bludgeoning;
+                    _causeOfDeath = CauseOfDeath.Bludgeoning;
                     break;
                 case "crushing":
-                    causeOfDeath = CauseOfDeath.Crushing;
+                    _causeOfDeath = CauseOfDeath.Crushing;
                     break;
                 case "drowniing":
-                    causeOfDeath = CauseOfDeath.Drowning;
+                    _causeOfDeath = CauseOfDeath.Drowning;
                     break;
                 case "electrocution":
-                    causeOfDeath = CauseOfDeath.Electrocution;
+                    _causeOfDeath = CauseOfDeath.Electrocution;
                     break;
                 case "gravity":
-                    causeOfDeath = CauseOfDeath.Gravity;
+                    _causeOfDeath = CauseOfDeath.Gravity;
                     break;
                 case "gunshots":
-                    causeOfDeath = CauseOfDeath.Gunshots;
+                    _causeOfDeath = CauseOfDeath.Gunshots;
                     break;
                 case "kicking":
-                    causeOfDeath = CauseOfDeath.Kicking;
+                    _causeOfDeath = CauseOfDeath.Kicking;
                     break;
                 case "mauling":
-                    causeOfDeath = CauseOfDeath.Mauling;
+                    _causeOfDeath = CauseOfDeath.Mauling;
                     break;
                 case "strangulation":
-                    causeOfDeath = CauseOfDeath.Strangulation;
+                    _causeOfDeath = CauseOfDeath.Strangulation;
                     break;
                 case "suffocation":
-                    causeOfDeath = CauseOfDeath.Suffocation;
+                    _causeOfDeath = CauseOfDeath.Suffocation;
                     break;
                 case "unknown":
-                    causeOfDeath = CauseOfDeath.Unknown;
+                    _causeOfDeath = CauseOfDeath.Unknown;
                     break;
             }
 
-            logger.LogDebug($"Got cause of death: {causeOfDeath}");
-            return causeOfDeath;
+            logger.LogDebug($"Got cause of death: {_causeOfDeath}");
+            return _causeOfDeath;
         }
 
-        public static void KillPlayer(PlayerControllerB playerToDie, CauseOfDeath causeOfDeath)
+        public void KillPlayer()
         {
-            playerToDie.causeOfDeath = causeOfDeath;
-            NetworkHandler.clientMessage.SendServer(playerToDie.actualClientId);
+            PlayerToDie.causeOfDeath = causeOfDeath;
+            NetworkHandler.clientMessage.SendServer(PlayerToDie.actualClientId);
         }
 
         public static void GetEnemy()
