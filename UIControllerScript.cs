@@ -121,6 +121,7 @@ namespace DeathNote
             txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
 
             logger.LogDebug("UIControllerScript: Start() complete");
+            txtPlayerUsername.value = "PLAYER #0"; // TODO: Testing, remove later
         }
 
         private void Update()
@@ -198,9 +199,10 @@ namespace DeathNote
         }
         private IEnumerator StartProgressBarTimerCoroutine(DeathController deathController)
         {
-            while (TimeOfDay.Instance.normalizedTimeOfDay < pbRemainingTime.highValue)
+            while (pbRemainingTime.value < pbRemainingTime.highValue)
             {
-                pbRemainingTime.value = TimeOfDay.Instance.normalizedTimeOfDay;
+                pbRemainingTime.value = TimeOfDay.Instance.currentDayTime;
+                lblResult.text = $"{pbRemainingTime.lowValue} || {pbRemainingTime.value} || {pbRemainingTime.highValue}";
                 yield return new WaitForSeconds(Time.deltaTime);
             }
 
@@ -240,11 +242,13 @@ namespace DeathNote
                 txtTimeOfDeath.style.display = DisplayStyle.Flex;
                 txtTimeOfDeath.value = "";
                 pbRemainingTime.style.display = DisplayStyle.Flex;
-                pbRemainingTime.value = 0;
 
-                pbRemainingTime.lowValue = TimeOfDay.Instance.normalizedTimeOfDay;
-                pbRemainingTime.highValue = (TimeOfDay.Instance.currentDayTime + timeRemaining) / TimeOfDay.Instance.totalTime;
-                txtTimeOfDeath.value = NormalizedToClock(pbRemainingTime.highValue);
+                pbRemainingTime.lowValue = 0;
+                //pbRemainingTime.lowValue = TimeOfDay.Instance.currentDayTime; // TODO: This keeps starting at 75% rather than the beginning
+                pbRemainingTime.value = pbRemainingTime.lowValue;
+                pbRemainingTime.highValue = TimeOfDay.Instance.currentDayTime + timeRemaining;
+
+                txtTimeOfDeath.value = NormalizedToClock(pbRemainingTime.highValue / TimeOfDay.Instance.totalTime);
                 verifying = true;
                 StartProgressBarTimer(deathController); // TODO: implement
 
