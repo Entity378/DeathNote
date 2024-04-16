@@ -4,18 +4,38 @@ using DeathNote;
 using GameNetcodeStuff;
 using LethalLib.Modules;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UIElements;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Xml.Linq;
+using UnityEngine;
+using UnityEngine.UIElements;
+using UnityEngine.Windows;
+using UnityEngine.InputSystem;
+using DeathNote;
+using BepInEx.Logging;
+using UnityEngine.InputSystem.XR;
+using LethalLib.Modules;
+using System.Linq;
+using GameNetcodeStuff;
+using System.Collections;
+using TMPro;
 
 namespace DeathNote
 {
-    public class DeathController
+    public class DeathController : MonoBehaviour
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
         public static bool ShinigamiEyesActivated = false;
+
+        public UIControllerScript ui;
 
         public PlayerControllerB PlayerToDie;
         public CauseOfDeath causeOfDeath;
@@ -94,11 +114,55 @@ namespace DeathNote
             logger.LogDebug($"Got cause of death: {_causeOfDeath}");
             return _causeOfDeath;
         }
+        public void StartKillTimer() // TODO: MAIN TIMER, WILL BE A LOT
+        {
+            logger.LogDebug("Starting kill timer");
+            StartCoroutine(StartKillTimerCoroutine());
+            // TODO: Make sure all these changes work and continue here, get timeofdeath next
+        }
+        private IEnumerator StartKillTimerCoroutine()
+        {
+            Label lblPlayerToDie = new Label();
+            //lblPlayerToDie.style.unityFont = DeathNoteBase.DNAssetBundle.LoadAsset<Font>("Assets/DeathNote/Death Note.ttf");
+            lblPlayerToDie.text = $"{PlayerToDie.playerUsername}: {causeOfDeath}, {ui.TimeToClock(TimeOfDeath)}";
+            lblPlayerToDie.style.color = Color.red;
+
+            ProgressBar pbTimeToDie = new ProgressBar();
+            pbTimeToDie.name = "pbTimeToDie";
+            pbTimeToDie.lowValue = 0;
+            pbTimeToDie.highValue = TimeOfDeath - TimeOfDay.Instance.currentDayTime;
+            pbTimeToDie.style.display = DisplayStyle.Flex;
+            //pbTimeToDie.style.marginBottom = 50;
+            pbTimeToDie.title = "Remaining Time";
+            //pbTimeToDie.SetEnabled(true);
+
+            //ScrollView svRight = veMain.Q<ScrollView>("svRight");
+            ui.svRight.Add(lblPlayerToDie);
+            ui.svRight.Add(pbTimeToDie);
+
+            //pbTimeToDie = svRight.Q<ProgressBar>("pbTimeToDie");
+            if (pbTimeToDie == null) { logger.LogError("pbTimeToDie is null"); }
+
+            float elapsedTime = 0f;
+
+            while (pbTimeToDie.value < pbTimeToDie.highValue)
+            {
+                //ui.lblResult.text = elapsedTime.ToString();
+                elapsedTime += Time.deltaTime * TimeOfDay.Instance.globalTimeSpeedMultiplier;
+                pbTimeToDie.value = Mathf.Lerp(pbTimeToDie.lowValue, pbTimeToDie.highValue, elapsedTime / pbTimeToDie.highValue);
+                yield return null;
+            }
+
+            KillPlayer();
+            ui.svRight.Remove(lblPlayerToDie);
+            ui.svRight.Remove(pbTimeToDie);
+        }
 
         public void KillPlayer()
         {
+            logger.LogDebug($"Killing player {PlayerToDie.playerUsername}: {causeOfDeath}, {TimeOfDeathString}");
             PlayerToDie.causeOfDeath = causeOfDeath;
-            NetworkHandler.clientMessage.SendServer(PlayerToDie.actualClientId);
+            //NetworkHandler.clientMessage.SendServer(PlayerToDie.actualClientId);
         }
 
         public static void GetEnemy()

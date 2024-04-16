@@ -23,6 +23,7 @@ namespace DeathNote
 
         public static UIControllerScript Instance { get; private set; }
         public VisualElement veMain;
+        public ScrollView svRight;
         public int timeRemaining = 40; // TODO: get this from config
         private bool verifying = false;
 
@@ -72,6 +73,9 @@ namespace DeathNote
             veMain.style.display = DisplayStyle.None;
             if (veMain == null) { logger.LogError("veMain not found."); return; }
 
+            svRight = uiDocument.rootVisualElement.Q<ScrollView>("svRight");
+            if (svRight == null) { logger.LogError("svRight not found."); return; }
+
             // Find elements
             lblResult = root.Q<Label>("lblResult");
             if (lblResult == null) { logger.LogError("lblResult not found."); return; }
@@ -90,9 +94,17 @@ namespace DeathNote
             txtTimeOfDeath = root.Q<TextField>("txtTimeOfDeath");
             if (txtTimeOfDeath == null) { logger.LogError("txtTimeOfDeath not found."); return; }
 
-            pbRemainingTime = root.Q<ProgressBar>("pbRemainingTime");
+            VisualElement veLeft = root.Q<VisualElement>("veLeft");
+            int index = veLeft.IndexOf(txtTimeOfDeath);
+            pbRemainingTime = new ProgressBar();
+            pbRemainingTime.name = "pbRemainingTime";
+            pbRemainingTime.title = "Time Remaining";
+            pbRemainingTime.style.flexGrow = 0.90f;
+            pbRemainingTime.style.display = DisplayStyle.None;
+            veLeft.Insert(index + 1, pbRemainingTime);
+            /*pbRemainingTime = root.Q<ProgressBar>("pbRemainingTime");
             if (pbRemainingTime == null) { logger.LogError("pbRemainingTime not found."); return; }
-            pbRemainingTime.highValue = timeRemaining;
+            pbRemainingTime.highValue = timeRemaining;*/
 
             lblSEDescription = root.Q<Label>("lblSEDescription");
             if (lblSEDescription == null) { logger.LogError("lblSEDescription not found."); return; }
@@ -153,7 +165,7 @@ namespace DeathNote
             StartOfRound.Instance.localPlayerController.disableLookInput = false;
         }
 
-        private void ResetUI1() // TODO: might not be needed
+        public void ResetUI1() // TODO: might not be needed
         {
             logger.LogDebug("ResetUI");
             throw new NotImplementedException();
@@ -169,7 +181,7 @@ namespace DeathNote
             uiDocument.rootVisualElement.Add(veMain); // Add new UI*/
         }
 
-        private void ResetUI()
+        public void ResetUI()
         {
             txtPlayerUsername.value = "";
             txtPlayerUsername.isReadOnly = false;
@@ -177,20 +189,12 @@ namespace DeathNote
             dpdnDeathType.index = 0;
             txtTimeOfDeath.style.display = DisplayStyle.None;
             txtTimeOfDeath.value = "";
-            pbRemainingTime.style.display = DisplayStyle.Flex;
+            pbRemainingTime.style.display = DisplayStyle.None;
+            pbRemainingTime.highValue = 0;
+            pbRemainingTime.lowValue = 0;
             pbRemainingTime.value = 0;
 
             verifying = false;
-        }
-
-        private void StartKillTimer(DeathController deathController) // TODO: MAIN TIMER, WILL BE A LOT
-        {
-            deathController.causeOfDeath = DeathController.GetCauseOfDeathFromString(dpdnDeathType.value);
-            // TODO: Make sure all these changes work and continue here, get timeofdeath next
-        }
-        private IEnumerator StartKillTimerCoroutine()
-        {
-            throw new NotImplementedException();
         }
 
         private void StartProgressBarTimer(DeathController deathController)
@@ -199,14 +203,41 @@ namespace DeathNote
         }
         private IEnumerator StartProgressBarTimerCoroutine(DeathController deathController)
         {
+            pbRemainingTime.lowValue = 0; // TODO: This keeps starting at 75% rather than the beginning
+            pbRemainingTime.highValue = timeRemaining;
+
+            txtTimeOfDeath.value = TimeToClock(TimeOfDay.Instance.currentDayTime + timeRemaining);
+            float elapsedTime = 0f;
+
             while (pbRemainingTime.value < pbRemainingTime.highValue)
             {
-                pbRemainingTime.value = TimeOfDay.Instance.currentDayTime;
-                lblResult.text = $"{pbRemainingTime.lowValue} || {pbRemainingTime.value} || {pbRemainingTime.highValue}";
-                yield return new WaitForSeconds(Time.deltaTime);
+                if (!verifying)
+                {
+                    break;
+                }
+                elapsedTime += Time.deltaTime * TimeOfDay.Instance.globalTimeSpeedMultiplier;
+                pbRemainingTime.value = Mathf.Lerp(pbRemainingTime.lowValue, pbRemainingTime.highValue, elapsedTime / timeRemaining);
+                yield return null;
             }
 
-            StartKillTimer(deathController);
+
+            deathController.causeOfDeath = DeathController.GetCauseOfDeathFromString(dpdnDeathType.value);
+            
+            deathController.TimeOfDeathString = txtTimeOfDeath.text;
+            float _timeOfDeath = ClockToTime(txtTimeOfDeath.text);
+            if (_timeOfDeath == -1 || !(TimeOfDay.Instance.currentDayTime <= _timeOfDeath) || !(_timeOfDeath <= TimeOfDay.Instance.totalTime)) { 
+                deathController.KillPlayer();
+            }
+            else
+            {
+                deathController.TimeOfDeath = _timeOfDeath;
+                logger.LogDebug("setting instance");
+                deathController.ui = Instance;
+                logger.LogDebug("instance set");
+                deathController.StartKillTimer();
+            }
+
+            ResetUI();
         }
 
         private void BtnSubmitOnClick()
@@ -216,7 +247,6 @@ namespace DeathNote
 
             if (verifying)
             {
-
 
                 // TODO: For when you press submit the second time, locking it in and adding it to the second page. make sure to parse everything and showresults if they are wrong
                 verifying = false;
@@ -243,17 +273,8 @@ namespace DeathNote
                 txtTimeOfDeath.value = "";
                 pbRemainingTime.style.display = DisplayStyle.Flex;
 
-                pbRemainingTime.lowValue = 0;
-                //pbRemainingTime.lowValue = TimeOfDay.Instance.currentDayTime; // TODO: This keeps starting at 75% rather than the beginning
-                pbRemainingTime.value = pbRemainingTime.lowValue;
-                pbRemainingTime.highValue = TimeOfDay.Instance.currentDayTime + timeRemaining;
-
-                txtTimeOfDeath.value = NormalizedToClock(pbRemainingTime.highValue / TimeOfDay.Instance.totalTime);
                 verifying = true;
-                StartProgressBarTimer(deathController); // TODO: implement
-
-
-                // TODO: Continue here?
+                StartProgressBarTimer(deathController);
             }
             else
             {
@@ -269,9 +290,10 @@ namespace DeathNote
             }
         }
 
-        public string NormalizedToClock(float timeNormalized) // THIS WORKS
+        public string TimeToClock(float time) // THIS WORKS
         {
             int numberOfHours = TimeOfDay.Instance.numberOfHours;
+            float timeNormalized = time / TimeOfDay.Instance.totalTime;
             int num = (int)(timeNormalized * (60f * numberOfHours)) + 360;
             logger.LogDebug($"num: {num}");
             int num2 = (int)Mathf.Floor(num / 60);
@@ -301,7 +323,7 @@ namespace DeathNote
             return text;
         }
 
-        public float ClockToNormalized(string timeString) // THIS WORKS DONT TOUCH FOR THE LOVE OF GOD
+        public float ClockToTime(string timeString) // THIS WORKS DONT TOUCH FOR THE LOVE OF GOD
         {
             timeString = timeString.ToUpper().Replace(" ", "").Replace("\n", "");
 
@@ -313,8 +335,13 @@ namespace DeathNote
 
             // Split the time string into hours, minutes, and AM/PM
             string[] timeParts = timeString.Split(':');
-            int hours = int.Parse(timeParts[0]);
-            int minutes = int.Parse(timeParts[1].Substring(0, 2)); // Extract minutes
+
+            int hours;// = int.Parse(timeParts[0]);
+            int minutes;// = int.Parse(timeParts[1].Substring(0, 2)); // Extract minutes
+
+            if (!int.TryParse(timeParts[0], out hours)) { return -1; }
+            if (!int.TryParse(timeParts[1].Substring(0, 2), out minutes)) { return -1; }
+
             string amPm = timeParts[1].Substring(2); // Extract AM/PM
 
             // Convert hours to 24-hour format
@@ -332,11 +359,10 @@ namespace DeathNote
             hours = hours - startHour;
             float totalMinutes = (hours * lengthOfHours) + minutes;
 
-            // Convert total minutes to normalized time
-            // normalizedTime = currentDayTime / totalTime;
-            float normalizedTime = totalMinutes / totalTime; // Assuming 24-hour day
+            // Convert total minutes to normalized time, might not be needed
+            //float normalizedTime = totalMinutes / totalTime; // Assuming 24-hour day
 
-            return normalizedTime;
+            return totalMinutes;
         }
 
         public void ShowResults(string message, float duration = 3f, bool flash = false)
