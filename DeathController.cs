@@ -109,19 +109,16 @@ namespace DeathNote
                 case "unknown":
                     _causeOfDeath = CauseOfDeath.Unknown;
                     break;
+                    // TODO: Add new causes of death
             }
 
             logger.LogDebug($"Got cause of death: {_causeOfDeath}");
             return _causeOfDeath;
         }
-        public void StartKillTimer() // TODO: MAIN TIMER, WILL BE A LOT
+        public IEnumerator StartKillTimerCoroutine()
         {
-            logger.LogDebug("Starting kill timer");
-            StartCoroutine(StartKillTimerCoroutine());
-            // TODO: Make sure all these changes work and continue here, get timeofdeath next
-        }
-        private IEnumerator StartKillTimerCoroutine()
-        {
+            logger.LogDebug("In StartKillTimerCoroutine");
+            yield return new WaitForSeconds(1f);
             Label lblPlayerToDie = new Label();
             //lblPlayerToDie.style.unityFont = DeathNoteBase.DNAssetBundle.LoadAsset<Font>("Assets/DeathNote/Death Note.ttf");
             lblPlayerToDie.text = $"{PlayerToDie.playerUsername}: {causeOfDeath}, {ui.TimeToClock(TimeOfDeath)}";
@@ -162,7 +159,7 @@ namespace DeathNote
         {
             logger.LogDebug($"Killing player {PlayerToDie.playerUsername}: {causeOfDeath}, {TimeOfDeathString}");
             PlayerToDie.causeOfDeath = causeOfDeath;
-            //NetworkHandler.clientMessage.SendServer(PlayerToDie.actualClientId);
+            NetworkHandler.clientMessage.SendServer(PlayerToDie.actualClientId);
         }
 
         public static void GetEnemy()

@@ -17,8 +17,7 @@ namespace DeathNote.Patches
         [HarmonyPatch("OpenQuickMenu")]
         public static bool OpenQuickMenuPatch()
         {
-            //UIControllerScript? uiController = 
-            if (UIControllerScript.Instance == null) { logger.LogError("UIController is null!"); return true; }
+            if (UIControllerScript.Instance == null) { return true; }
             if (UIControllerScript.Instance.veMain == null) { logger.LogError("veMain is null!"); return true; }
             if (UIControllerScript.Instance.veMain.style.display == DisplayStyle.Flex) { return false; }
             return true;

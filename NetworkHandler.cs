@@ -37,8 +37,7 @@ namespace DeathNote
         {
             logger.LogDebug("In RecieveFromServer");
             PlayerControllerB playerToDie = GameNetworkManager.Instance.localPlayerController;
-            playerToDie.KillPlayer(new Vector3()); // ???
-            ChatController.SendChatMessage("You have died from a sudden heart attack");
+            playerToDie.KillPlayer(new Vector3()); // TODO: This makes player go into the floor???
         }
 
         private static void RecieveFromClient(ulong playerToDieId, ulong clientID)

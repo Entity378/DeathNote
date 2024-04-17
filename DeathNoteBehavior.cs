@@ -22,7 +22,6 @@ namespace DeathNote
                 logger.LogDebug("Using item works!");
 
                 UIControllerScript uiController = GetComponent<UIControllerScript>();
-                //VisualElement veMain = GetComponent<UIDocument>().rootVisualElement.Q<VisualElement>("veMain");
                 logger.LogDebug("Got veMain");
                 logger.LogMessage(uiController.veMain.style.display.ToString());
                 if (uiController.veMain.style.display == null)
@@ -36,20 +35,6 @@ namespace DeathNote
                     logger.LogDebug("Showing UI");
                     uiController.ShowUI();
                 }
-                
-                //List<SpawnableEnemyWithRarity> enemies = DeathController.GetEnemies();
-
-                /*PlayerControllerB player = DeathController.PlayerToDie;
-                if (player != null)
-                {
-                    if (player.isPlayerDead) { ChatController.SendChatMessage("This player is already dead..."); }
-                    NetworkHandler.clientMessage.SendServer(player.actualClientId);
-                    ChatController.SendChatMessage($"{player.playerUsername} has died of a heart attack");
-                }
-                else
-                {
-                    ChatController.SendChatMessage("A name was unspecified or doesnt exist. (Use /deathnote playerusername)");
-                }*/
             }
         }
     }

@@ -27,9 +27,6 @@ namespace DeathNote
         public int timeRemaining = 40; // TODO: get this from config
         private bool verifying = false;
 
-        
-
-        //private List<PlayerToDie> PlayersToDie;
 
         public Label lblResult;
         public TextField txtPlayerUsername;
@@ -48,8 +45,6 @@ namespace DeathNote
             {
                 Instance = this;
             }
-
-            //PlayersToDie = new List<PlayerToDie>();
 
             // Get UIDocument
             logger.LogDebug("Getting UIDocument");
@@ -102,9 +97,6 @@ namespace DeathNote
             pbRemainingTime.style.flexGrow = 0.90f;
             pbRemainingTime.style.display = DisplayStyle.None;
             veLeft.Insert(index + 1, pbRemainingTime);
-            /*pbRemainingTime = root.Q<ProgressBar>("pbRemainingTime");
-            if (pbRemainingTime == null) { logger.LogError("pbRemainingTime not found."); return; }
-            pbRemainingTime.highValue = timeRemaining;*/
 
             lblSEDescription = root.Q<Label>("lblSEDescription");
             if (lblSEDescription == null) { logger.LogError("lblSEDescription not found."); return; }
@@ -133,7 +125,6 @@ namespace DeathNote
             txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
 
             logger.LogDebug("UIControllerScript: Start() complete");
-            txtPlayerUsername.value = "PLAYER #0"; // TODO: Testing, remove later
         }
 
         private void Update()
@@ -165,22 +156,6 @@ namespace DeathNote
             StartOfRound.Instance.localPlayerController.disableLookInput = false;
         }
 
-        public void ResetUI1() // TODO: might not be needed
-        {
-            logger.LogDebug("ResetUI");
-            throw new NotImplementedException();
-            // TODO: implement uiDocument.enabled = false;?
-
-            /*UIDocument uiDocument = GetComponent<UIDocument>();
-            if (uiDocument == null) { logger.LogError("uiDocument is null!"); return; }
-            VisualElement veMain = GetComponent<UIDocument>().rootVisualElement;
-            if (veMain == null) { logger.LogError("veMain is null!"); return; }
-
-            veMain.Clear(); // Remove current UI
-            veMain = uiDocument.visualTreeAsset.Instantiate(); // Instantiate new UI
-            uiDocument.rootVisualElement.Add(veMain); // Add new UI*/
-        }
-
         public void ResetUI()
         {
             txtPlayerUsername.value = "";
@@ -203,7 +178,7 @@ namespace DeathNote
         }
         private IEnumerator StartProgressBarTimerCoroutine(DeathController deathController)
         {
-            pbRemainingTime.lowValue = 0; // TODO: This keeps starting at 75% rather than the beginning
+            pbRemainingTime.lowValue = 0;
             pbRemainingTime.highValue = timeRemaining;
 
             txtTimeOfDeath.value = TimeToClock(TimeOfDay.Instance.currentDayTime + timeRemaining);
@@ -234,10 +209,16 @@ namespace DeathNote
                 logger.LogDebug("setting instance");
                 deathController.ui = Instance;
                 logger.LogDebug("instance set");
-                deathController.StartKillTimer();
+                StartKillTimer(deathController);
             }
 
             ResetUI();
+        }
+
+        public void StartKillTimer(DeathController deathController)
+        {
+            logger.LogDebug("Starting kill timer");
+            StartCoroutine(deathController.StartKillTimerCoroutine());
         }
 
         private void BtnSubmitOnClick()
@@ -247,21 +228,24 @@ namespace DeathNote
 
             if (verifying)
             {
+                float time = ClockToTime(txtTimeOfDeath.text);
+                if (time == -1)
+                {
+                    ShowResults("Wrong time format or out of reach. Format: 00:00AM/PM", 5, true);
+                    return;
+                }
 
-                // TODO: For when you press submit the second time, locking it in and adding it to the second page. make sure to parse everything and showresults if they are wrong
                 verifying = false;
                 return;
             }
-
-            ShowResults("Searching for player to kill...", 0.5f); // TODO: TEMP FOR TESTING DELETE ME
             
-            PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == txtPlayerUsername.text.ToLower()).FirstOrDefault();
+            PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == txtPlayerUsername.text.ToLower()).FirstOrDefault(); // TODO: Add entity searching as well
 
-            if (playerToDie != null) // TODO: TEMP FOR TESTING CHANGE BACK TO !=
+            if (playerToDie != null)
             {
                 if (playerToDie.isPlayerDead) { ShowResults("Player is already dead"); return; }
                 logger.LogDebug($"Found player to kill: {playerToDie.playerUsername}");
-                ShowResults($"Found player to kill: {playerToDie.playerUsername}");
+                ShowResults($"Found player to kill: {playerToDie.playerUsername}", 3, true);
 
                 DeathController deathController = new DeathController();
                 deathController.PlayerToDie = playerToDie;
@@ -278,7 +262,7 @@ namespace DeathNote
             }
             else
             {
-                ShowResults("Could not find player to kill");
+                ShowResults("Could not find player to kill", 3, true);
             }
         }
 
@@ -336,8 +320,8 @@ namespace DeathNote
             // Split the time string into hours, minutes, and AM/PM
             string[] timeParts = timeString.Split(':');
 
-            int hours;// = int.Parse(timeParts[0]);
-            int minutes;// = int.Parse(timeParts[1].Substring(0, 2)); // Extract minutes
+            int hours;
+            int minutes;
 
             if (!int.TryParse(timeParts[0], out hours)) { return -1; }
             if (!int.TryParse(timeParts[1].Substring(0, 2), out minutes)) { return -1; }
@@ -358,9 +342,6 @@ namespace DeathNote
             // Calculate the total number of minutes
             hours = hours - startHour;
             float totalMinutes = (hours * lengthOfHours) + minutes;
-
-            // Convert total minutes to normalized time, might not be needed
-            //float normalizedTime = totalMinutes / totalTime; // Assuming 24-hour day
 
             return totalMinutes;
         }
@@ -412,7 +393,6 @@ namespace DeathNote
             else { verifying = true; }
 
             logger.LogDebug("BtnActivateEyesOnClick");
-            //throw new NotImplementedException();
         }
     }
 }
