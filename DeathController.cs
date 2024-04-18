@@ -75,8 +75,12 @@ namespace DeathNote
         // 0 = normal
         // 1 = decapitation
         // 2 = coilhead decapitation
+        // 3 = seizure
+        // 4 = disapearance
+        // 5 = mask
+        // 6 = burn
 
-        public static CauseOfDeath GetCauseOfDeathFromString(string causeOfDeathString) // TODO: might need to add Unknown to list as default value
+        public static CauseOfDeath GetCauseOfDeathFromString(string causeOfDeathString)
         {
             CauseOfDeath _causeOfDeath = CauseOfDeath.Unknown;
             
@@ -146,7 +150,7 @@ namespace DeathNote
             logger.LogDebug("In StartKillTimerCoroutine");
             yield return new WaitForSeconds(1f);
             Label lblPlayerToDie = new Label();
-            //lblPlayerToDie.style.unityFont = DeathNoteBase.DNAssetBundle.LoadAsset<Font>("Assets/DeathNote/Death Note.ttf");
+            //lblPlayerToDie.style.unityFont = DeathNoteBase.DNAssetBundle.LoadAsset<Font>("Assets/DeathNote/Death Note.ttf"); // TODO: figure out how to get this to work
             lblPlayerToDie.text = $"{PlayerToDie.playerUsername}: {causeOfDeathString}, {ui.TimeToClock(TimeOfDeath)}";
             lblPlayerToDie.style.color = Color.red;
 
@@ -179,8 +183,6 @@ namespace DeathNote
         public void KillPlayer()
         {
             logger.LogDebug($"Killing player {PlayerToDie.playerUsername}: {causeOfDeathString}, {TimeOfDeathString}");
-
-            // TODO: continue here with death animations
 
             string[] info = { PlayerToDie.actualClientId.ToString(), causeOfDeathString, detailsString };
             NetworkHandler.clientMessage.SendServer(info);

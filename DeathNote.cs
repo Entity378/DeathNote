@@ -70,7 +70,7 @@ namespace DeathNote
             LoggerInstance.LogDebug("Got UIControllerScript");
 
             // Register Scrap
-            int iRarity = 5; // TODO: Change this back to 5 later
+            int iRarity = 5;
             NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
             Utilities.FixMixerGroups(DeathNote.spawnPrefab);
             Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All);

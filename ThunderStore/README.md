@@ -1,7 +1,7 @@
 # Death Note
 
 ## Description
-Adds the Death Note as a rare scrap item to kill your friends with! 
+Adds the Death Note as a rare scrap item to kill your friends with! Allows you to choose a type of death and death animation so you can cover up your deaths.
 
 ## Features/How to use
 
