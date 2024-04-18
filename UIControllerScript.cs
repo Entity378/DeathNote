@@ -23,8 +23,9 @@ namespace DeathNote
         public Label lblResult;
         public TextField txtPlayerUsername;
         public Button btnSubmit;
-        public DropdownField dpdnDeathType;
         public TextField txtTimeOfDeath;
+        public DropdownField dpdnDeathType;
+        public DropdownField dpdnDetails;
         public ProgressBar pbRemainingTime;
         public Label lblSEDescription;
         public Button btnActivateEyes;
@@ -73,10 +74,24 @@ namespace DeathNote
             btnSubmit = root.Q<Button>("btnSubmit");
             if (btnSubmit == null) { logger.LogError("btnSubmit not found."); return; }
 
+            txtTimeOfDeath = root.Q<TextField>("txtTimeOfDeath");
+            if (txtTimeOfDeath == null) { logger.LogError("txtTimeOfDeath not found."); return; }
+
             dpdnDeathType = root.Q<DropdownField>("dpdnDeathType");
             if (dpdnDeathType == null) { logger.LogError("dpdnDeathType not found."); return; }
             dpdnDeathType.choices = DeathController.GetCauseOfDeathsAsStrings();
             dpdnDeathType.index = 0;
+
+            dpdnDetails = root.Q<DropdownField>("dpdnDetails");
+            if (dpdnDetails == null) { logger.LogError("dpdnDetails not found."); return; }
+            dpdnDetails.choices = DeathController.Details;
+            dpdnDetails.index = 0;
+
+            lblSEDescription = root.Q<Label>("lblSEDescription");
+            if (lblSEDescription == null) { logger.LogError("lblSEDescription not found."); return; }
+
+            btnActivateEyes = root.Q<Button>("btnActivateEyes");
+            if (btnActivateEyes == null) { logger.LogError("btnActivateEyes not found."); return; }
 
             txtTimeOfDeath = root.Q<TextField>("txtTimeOfDeath");
             if (txtTimeOfDeath == null) { logger.LogError("txtTimeOfDeath not found."); return; }
@@ -89,15 +104,6 @@ namespace DeathNote
             pbRemainingTime.style.flexGrow = 0.90f;
             pbRemainingTime.style.display = DisplayStyle.None;
             veLeft.Insert(index + 1, pbRemainingTime);
-
-            lblSEDescription = root.Q<Label>("lblSEDescription");
-            if (lblSEDescription == null) { logger.LogError("lblSEDescription not found."); return; }
-
-            btnActivateEyes = root.Q<Button>("btnActivateEyes");
-            if (btnActivateEyes == null) { logger.LogError("btnActivateEyes not found."); return; }
-
-            txtTimeOfDeath = root.Q<TextField>("txtTimeOfDeath");
-            if (txtTimeOfDeath == null) { logger.LogError("txtTimeOfDeath not found."); return; }
 
             pbRemainingTime = root.Q<ProgressBar>("pbRemainingTime");
             if (pbRemainingTime == null) { logger.LogError("pbRemainingTime not found."); return; }
@@ -152,10 +158,12 @@ namespace DeathNote
         {
             txtPlayerUsername.value = "";
             txtPlayerUsername.isReadOnly = false;
-            dpdnDeathType.style.display = DisplayStyle.None;
-            dpdnDeathType.index = 0;
             txtTimeOfDeath.style.display = DisplayStyle.None;
             txtTimeOfDeath.value = "";
+            dpdnDeathType.style.display = DisplayStyle.None;
+            dpdnDeathType.index = 0;
+            dpdnDetails.style.display = DisplayStyle.None;
+            dpdnDetails.index = 0;
             pbRemainingTime.style.display = DisplayStyle.None;
             pbRemainingTime.highValue = 0;
             pbRemainingTime.lowValue = 0;
@@ -189,6 +197,7 @@ namespace DeathNote
 
 
             deathController.causeOfDeathString = dpdnDeathType.value;
+            deathController.detailsString = dpdnDetails.value;
             
             deathController.TimeOfDeathString = txtTimeOfDeath.text;
             float _timeOfDeath = ClockToTime(txtTimeOfDeath.text);
@@ -243,10 +252,12 @@ namespace DeathNote
                 deathController.PlayerToDie = playerToDie;
                 
                 txtPlayerUsername.isReadOnly = true;
-                dpdnDeathType.style.display = DisplayStyle.Flex;
-                dpdnDeathType.index = 0;
                 txtTimeOfDeath.style.display = DisplayStyle.Flex;
                 txtTimeOfDeath.value = "";
+                dpdnDeathType.style.display = DisplayStyle.Flex;
+                dpdnDeathType.index = 0;
+                dpdnDetails.style.display = DisplayStyle.Flex;
+                dpdnDetails.index = 0;
                 pbRemainingTime.style.display = DisplayStyle.Flex;
 
                 verifying = true;

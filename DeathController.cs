@@ -39,9 +39,13 @@ namespace DeathNote
 
         public PlayerControllerB PlayerToDie;
         public string causeOfDeathString;
+        public string detailsString;
 
         public string TimeOfDeathString;
         public float TimeOfDeath;
+
+        public static List<string> Details = new List<string> { "Heart Attack", "Decapitation", "Coil Decapitation", "Seizure", "Disappearance", "Mask", "Burn" }; // disapearance is 4
+
 
         public static List<string> GetCauseOfDeathsAsStrings()
         {
@@ -66,6 +70,11 @@ namespace DeathNote
 
             return deathType;
         }
+
+        // deathAnimations:
+        // 0 = normal
+        // 1 = decapitation
+        // 2 = coilhead decapitation
 
         public static CauseOfDeath GetCauseOfDeathFromString(string causeOfDeathString) // TODO: might need to add Unknown to list as default value
         {
@@ -126,6 +135,12 @@ namespace DeathNote
             logger.LogDebug($"Got cause of death: {_causeOfDeath}");
             return _causeOfDeath;
         }
+
+        /*public static string GetDetailsAsIndex(string _details)
+        {
+            int index = GetCauseOfDeathsAsStrings().IndexOf(_details);
+        }*/
+
         public IEnumerator StartKillTimerCoroutine()
         {
             logger.LogDebug("In StartKillTimerCoroutine");
@@ -164,7 +179,10 @@ namespace DeathNote
         public void KillPlayer()
         {
             logger.LogDebug($"Killing player {PlayerToDie.playerUsername}: {causeOfDeathString}, {TimeOfDeathString}");
-            string[] info = { PlayerToDie.actualClientId.ToString(), causeOfDeathString };
+
+            // TODO: continue here with death animations
+
+            string[] info = { PlayerToDie.actualClientId.ToString(), causeOfDeathString, detailsString };
             NetworkHandler.clientMessage.SendServer(info);
         }
 

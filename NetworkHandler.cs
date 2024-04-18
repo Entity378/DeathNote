@@ -37,8 +37,17 @@ namespace DeathNote
         {
             logger.LogDebug("In RecieveFromServer");
             PlayerControllerB playerToDie = GameNetworkManager.Instance.localPlayerController;
-            playerToDie.KillPlayer(new Vector3()); // TODO: This makes player go into the floor???
-            playerToDie.causeOfDeath = DeathController.GetCauseOfDeathFromString(info[1]);
+            CauseOfDeath causeOfDeath = DeathController.GetCauseOfDeathFromString(info[1]);
+
+            int details = DeathController.Details.IndexOf(info[2]);
+            logger.LogInfo($"Details: {details}");
+            if (details == 4)
+            {
+                playerToDie.KillPlayer(new Vector3(), false, causeOfDeath);
+                return;
+            }
+
+            playerToDie.KillPlayer(new Vector3(), true, causeOfDeath, details); // TODO: This makes player go into the floor???
         }
 
         private static void RecieveFromClient(string[] info, ulong clientID)
