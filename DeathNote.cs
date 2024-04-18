@@ -20,7 +20,7 @@ namespace DeathNote
     {
         private const string modGUID = "Snowlance.DeathNote";
         private const string modName = "DeathNote";
-        private const string modVersion = "0.2.0";
+        private const string modVersion = "0.2.1";
 
         public static AssetBundle? DNAssetBundle;
 
@@ -70,7 +70,7 @@ namespace DeathNote
             LoggerInstance.LogDebug("Got UIControllerScript");
 
             // Register Scrap
-            int iRarity = 1000; // TODO: Change this back to 5 later
+            int iRarity = 5; // TODO: Change this back to 5 later
             NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
             Utilities.FixMixerGroups(DeathNote.spawnPrefab);
             Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All);

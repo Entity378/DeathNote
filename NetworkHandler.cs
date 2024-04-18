@@ -24,26 +24,27 @@ namespace DeathNote
         public static LethalServerEvent serverEvent = new LethalServerEvent(identifier: "event");
         public static LethalClientEvent clientEvent = new LethalClientEvent(identifier: "event");
 
-        public static LethalServerMessage<ulong> serverMessage = new LethalServerMessage<ulong>("message");
-        public static LethalClientMessage<ulong> clientMessage = new LethalClientMessage<ulong>("message");
+        public static LethalServerMessage<string[]> serverMessage = new LethalServerMessage<string[]>("message");
+        public static LethalClientMessage<string[]> clientMessage = new LethalClientMessage<string[]>("message");
 
         public static void Init()
         {
-            clientEvent.OnReceived += RecieveFromServer;
+            clientMessage.OnReceived += RecieveFromServer;
             serverMessage.OnReceived += RecieveFromClient;
         }
 
-        private static void RecieveFromServer()
+        private static void RecieveFromServer(string[] info)
         {
             logger.LogDebug("In RecieveFromServer");
             PlayerControllerB playerToDie = GameNetworkManager.Instance.localPlayerController;
             playerToDie.KillPlayer(new Vector3()); // TODO: This makes player go into the floor???
+            playerToDie.causeOfDeath = DeathController.GetCauseOfDeathFromString(info[1]);
         }
 
-        private static void RecieveFromClient(ulong playerToDieId, ulong clientID)
+        private static void RecieveFromClient(string[] info, ulong clientID)
         {
-            logger.LogDebug($"In RecieveFromClient: {playerToDieId}");
-            serverEvent.InvokeClient(playerToDieId);
+            logger.LogDebug($"In RecieveFromClient");
+            serverMessage.SendClient(info, ulong.Parse(info[0]));
         }
     }
 }

@@ -1,11 +1,11 @@
 {
   "name": "DeathNote",
-  "version_number": "0.1.1",
-  "website_url": "https://github.com/snowlance7/DeathNote",
-  "description": "Adds the Death Note as a rare scrap item to kill your friends!",
+  "version_number": "0.2.1",
+  "website_url": "https://ko-fi.com/snowlance",
+  "description": "V0.2.1: Added UI, TimeOfDeath and deathType! Adds the Death Note as a rare scrap item to kill your friends! Compatible with V50",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100",
     "xilophor-LethalNetworkAPI-2.1.6",
-    "Evaisa-LethalLib-0.15.0"
+    "Evaisa-LethalLib-0.15.1"
   ]
 }

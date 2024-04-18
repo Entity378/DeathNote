@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
-using UnityEngine;
-using UnityEngine.UIElements;
-using UnityEngine.Windows;
-using UnityEngine.InputSystem;
-using DeathNote;
-using BepInEx.Logging;
-using UnityEngine.InputSystem.XR;
-using LethalLib.Modules;
-using System.Linq;
+﻿using BepInEx.Logging;
 using GameNetcodeStuff;
 using System.Collections;
-using TMPro;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
+//using TMPro;
 
 namespace DeathNote
 {
@@ -196,7 +188,7 @@ namespace DeathNote
             }
 
 
-            deathController.causeOfDeath = DeathController.GetCauseOfDeathFromString(dpdnDeathType.value);
+            deathController.causeOfDeathString = dpdnDeathType.value;
             
             deathController.TimeOfDeathString = txtTimeOfDeath.text;
             float _timeOfDeath = ClockToTime(txtTimeOfDeath.text);

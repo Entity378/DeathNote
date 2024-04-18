@@ -25,7 +25,7 @@ using LethalLib.Modules;
 using System.Linq;
 using GameNetcodeStuff;
 using System.Collections;
-using TMPro;
+//using TMPro;
 
 namespace DeathNote
 {
@@ -38,7 +38,7 @@ namespace DeathNote
         public UIControllerScript ui;
 
         public PlayerControllerB PlayerToDie;
-        public CauseOfDeath causeOfDeath;
+        public string causeOfDeathString;
 
         public string TimeOfDeathString;
         public float TimeOfDeath;
@@ -51,13 +51,16 @@ namespace DeathNote
             deathType.Add(CauseOfDeath.Abandoned.ToString());
             deathType.Add(CauseOfDeath.Blast.ToString());
             deathType.Add(CauseOfDeath.Bludgeoning.ToString());
+            deathType.Add(CauseOfDeath.Burning.ToString());
             deathType.Add(CauseOfDeath.Crushing.ToString());
             deathType.Add(CauseOfDeath.Drowning.ToString());
             deathType.Add(CauseOfDeath.Electrocution.ToString());
+            deathType.Add(CauseOfDeath.Fan.ToString());
             deathType.Add(CauseOfDeath.Gravity.ToString());
             deathType.Add(CauseOfDeath.Gunshots.ToString());
             deathType.Add(CauseOfDeath.Kicking.ToString());
             deathType.Add(CauseOfDeath.Mauling.ToString());
+            deathType.Add(CauseOfDeath.Stabbing.ToString());
             deathType.Add(CauseOfDeath.Strangulation.ToString());
             deathType.Add(CauseOfDeath.Suffocation.ToString());
 
@@ -79,6 +82,9 @@ namespace DeathNote
                 case "bludgeoning":
                     _causeOfDeath = CauseOfDeath.Bludgeoning;
                     break;
+                case "burning":
+                    _causeOfDeath = CauseOfDeath.Burning;
+                    break;
                 case "crushing":
                     _causeOfDeath = CauseOfDeath.Crushing;
                     break;
@@ -87,6 +93,9 @@ namespace DeathNote
                     break;
                 case "electrocution":
                     _causeOfDeath = CauseOfDeath.Electrocution;
+                    break;
+                case "fan":
+                    _causeOfDeath = CauseOfDeath.Fan;
                     break;
                 case "gravity":
                     _causeOfDeath = CauseOfDeath.Gravity;
@@ -100,6 +109,9 @@ namespace DeathNote
                 case "mauling":
                     _causeOfDeath = CauseOfDeath.Mauling;
                     break;
+                case "stabbing":
+                    _causeOfDeath = CauseOfDeath.Stabbing;
+                    break;
                 case "strangulation":
                     _causeOfDeath = CauseOfDeath.Strangulation;
                     break;
@@ -109,7 +121,6 @@ namespace DeathNote
                 case "unknown":
                     _causeOfDeath = CauseOfDeath.Unknown;
                     break;
-                    // TODO: Add new causes of death
             }
 
             logger.LogDebug($"Got cause of death: {_causeOfDeath}");
@@ -121,7 +132,7 @@ namespace DeathNote
             yield return new WaitForSeconds(1f);
             Label lblPlayerToDie = new Label();
             //lblPlayerToDie.style.unityFont = DeathNoteBase.DNAssetBundle.LoadAsset<Font>("Assets/DeathNote/Death Note.ttf");
-            lblPlayerToDie.text = $"{PlayerToDie.playerUsername}: {causeOfDeath}, {ui.TimeToClock(TimeOfDeath)}";
+            lblPlayerToDie.text = $"{PlayerToDie.playerUsername}: {causeOfDeathString}, {ui.TimeToClock(TimeOfDeath)}";
             lblPlayerToDie.style.color = Color.red;
 
             ProgressBar pbTimeToDie = new ProgressBar();
@@ -129,22 +140,17 @@ namespace DeathNote
             pbTimeToDie.lowValue = 0;
             pbTimeToDie.highValue = TimeOfDeath - TimeOfDay.Instance.currentDayTime;
             pbTimeToDie.style.display = DisplayStyle.Flex;
-            //pbTimeToDie.style.marginBottom = 50;
             pbTimeToDie.title = "Remaining Time";
-            //pbTimeToDie.SetEnabled(true);
 
-            //ScrollView svRight = veMain.Q<ScrollView>("svRight");
             ui.svRight.Add(lblPlayerToDie);
             ui.svRight.Add(pbTimeToDie);
 
-            //pbTimeToDie = svRight.Q<ProgressBar>("pbTimeToDie");
             if (pbTimeToDie == null) { logger.LogError("pbTimeToDie is null"); }
 
             float elapsedTime = 0f;
 
             while (pbTimeToDie.value < pbTimeToDie.highValue)
             {
-                //ui.lblResult.text = elapsedTime.ToString();
                 elapsedTime += Time.deltaTime * TimeOfDay.Instance.globalTimeSpeedMultiplier;
                 pbTimeToDie.value = Mathf.Lerp(pbTimeToDie.lowValue, pbTimeToDie.highValue, elapsedTime / pbTimeToDie.highValue);
                 yield return null;
@@ -157,9 +163,9 @@ namespace DeathNote
 
         public void KillPlayer()
         {
-            logger.LogDebug($"Killing player {PlayerToDie.playerUsername}: {causeOfDeath}, {TimeOfDeathString}");
-            PlayerToDie.causeOfDeath = causeOfDeath;
-            NetworkHandler.clientMessage.SendServer(PlayerToDie.actualClientId);
+            logger.LogDebug($"Killing player {PlayerToDie.playerUsername}: {causeOfDeathString}, {TimeOfDeathString}");
+            string[] info = { PlayerToDie.actualClientId.ToString(), causeOfDeathString };
+            NetworkHandler.clientMessage.SendServer(info);
         }
 
         public static void GetEnemy()
