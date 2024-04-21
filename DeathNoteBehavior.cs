@@ -21,6 +21,13 @@ namespace DeathNote
             {
                 logger.LogDebug("Using item works!");
 
+                /*List<EnemyAI> enemies = RoundManager.Instance.SpawnedEnemies;
+                logger.LogDebug($"Got {enemies.Count} enemies");
+                foreach (EnemyAI enemy in enemies)
+                {
+                    logger.LogDebug($"{enemy.thisEnemyIndex}: {enemy.enemyType}");
+                }// TODO: need to access the name that pops up when scanning the enemy
+                */
                 UIControllerScript uiController = GetComponent<UIControllerScript>();
                 logger.LogDebug("Got veMain");
                 logger.LogMessage(uiController.veMain.style.display.ToString());

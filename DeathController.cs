@@ -35,6 +35,8 @@ namespace DeathNote
 
         public static bool ShinigamiEyesActivated = false;
 
+        public static List<string> EnemyNames = new List<string>();
+
         public UIControllerScript ui;
 
         public PlayerControllerB PlayerToDie;
@@ -188,13 +190,22 @@ namespace DeathNote
             NetworkHandler.clientMessage.SendServer(info);
         }
 
-        public static void GetEnemy()
+        public void KillEnemy()
         {
-            // TODO: implement, might not be needed
-            //public List<EnemyAI> SpawnedEnemies = new List<EnemyAI>();
+
         }
 
-        public static List<SpawnableEnemyWithRarity> GetEnemies()
+        public static void GetEnemy()
+        {
+            
+
+            // TODO: implement, might not be needed
+            //public List<EnemyAI> SpawnedEnemies = new List<EnemyAI>();
+            // public List<int> scannedEnemyIDs = new List<int>();
+
+        }
+
+        public static List<SpawnableEnemyWithRarity> GetEnemyTypes()
         {
             logger.LogDebug("Getting enemies");
             List<SpawnableEnemyWithRarity> enemies = new List<SpawnableEnemyWithRarity>();

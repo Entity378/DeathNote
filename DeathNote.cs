@@ -30,6 +30,7 @@ namespace DeathNote
 
         //public static ConfigEntry<float> configVolume;
 
+
         private void Awake()
         {
             if (PluginInstance == null)

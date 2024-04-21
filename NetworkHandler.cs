@@ -21,8 +21,8 @@ namespace DeathNote
             }
         }
 
-        public static LethalServerEvent serverEvent = new LethalServerEvent(identifier: "event");
-        public static LethalClientEvent clientEvent = new LethalClientEvent(identifier: "event");
+        //public static LethalServerEvent serverEvent = new LethalServerEvent(identifier: "event");
+        //public static LethalClientEvent clientEvent = new LethalClientEvent(identifier: "event");
 
         public static LethalServerMessage<string[]> serverMessage = new LethalServerMessage<string[]>("message");
         public static LethalClientMessage<string[]> clientMessage = new LethalClientMessage<string[]>("message");
