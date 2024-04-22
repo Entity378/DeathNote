@@ -33,7 +33,7 @@ namespace DeathNote
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
-        public static bool ShinigamiEyesActivated = false;
+        public static bool ShinigamiEyesActivated = true; // TODO: Set back to false
 
         public static List<string> EnemyNames = new List<string>();
 
