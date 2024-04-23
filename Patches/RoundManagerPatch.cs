@@ -14,15 +14,16 @@ namespace DeathNote.Patches
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
         [HarmonyPostfix]
-        [HarmonyPatch("SpawnEnemyFromVent")]
-        public static void SpawnEnemyFromVentPatch()
+        [HarmonyPatch("SpawnEnemyGameObject")]
+        public static void SpawnEnemyGameObjectPatch()
         {
+            logger.LogDebug("In SpawnEnemyGameObjectPatch");
             logger.LogDebug($"enemy names: {DeathController.EnemyNames.ToString()}");
 
             EnemyAI enemy = RoundManager.Instance.SpawnedEnemies.Last<EnemyAI>();
             logger.LogDebug($"enemy: {enemy.enemyType.enemyName}");
 
-            string enemyName = enemy.enemyType + new Random().Next(100, 1000).ToString() + "-" + enemy.thisEnemyIndex;
+            string enemyName = enemy.enemyType.enemyName + new Random().Next(100, 1000).ToString() + "-" + enemy.thisEnemyIndex;
             logger.LogDebug($"enemyName: {enemyName}");
             DeathController.EnemyNames.Add(enemyName);
 
