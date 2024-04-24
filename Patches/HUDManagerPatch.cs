@@ -16,34 +16,31 @@ namespace DeathNote.Patches
 
         [HarmonyPostfix]
         [HarmonyPatch("PingScan_performed")]
-        public static void PingScan_performedPatch()
+        public static void PingScan_performedPostFix()
         {
             // Private List<ScanNodeProperties> nodesOnScreen = new List<ScanNodeProperties>();
             if (DeathController.ShinigamiEyesActivated)
             {
-                List<ScanNodeProperties> nodes = HUDManager.Instance.nodesOnScreen;
-                logger.LogDebug($"Got {nodes.Count} nodes");
-
-                foreach (var node in nodes) // TODO: Continue testing here
+                foreach (var node in HUDManager.Instance.nodesOnScreen) // TODO: Continue testing here
                 {
-                    logger.LogDebug($"{node.nodeType} {node.headerText} {node.subText}");
-
-                    /*EnemyAI enemy = node.Value.gameObject.GetComponentInParent<EnemyAI>();
-                    logger.LogDebug($"Got enemy from scannode:{enemy.thisEnemyIndex}: {enemy.enemyType.enemyName}");
-                    string name = DeathController.EnemyNames.Where(x => int.Parse(x.Substring(x.Length - 1)) == enemy.thisEnemyIndex).First();
-                    
-                    logger.LogDebug("passed name check");
-                    logger.LogDebug("In PingScan_performedPatch: name: " + name);
-
-                    if (name != null)
+                    if(node.nodeType == 1)
                     {
-                        //scan_node.Value.headerText = name;
-                        //scan_node.Value.subText = enemy.enemyType.enemyName;
-                        //logger.LogDebug(scan_node.Value.headerText + " " + scan_node.Value.subText);
-                    }*/
+                        logger.LogDebug($"{node.nodeType} {node.headerText} {node.subText}");
+
+                        EnemyAI enemy = node.gameObject.GetComponentInParent<EnemyAI>();
+                        logger.LogDebug($"Got enemy from scannode:{enemy.thisEnemyIndex}: {enemy.enemyType.enemyName}");
+                        string name = DeathController.EnemyNames.Where(x => int.Parse(x.Substring(x.Length - 1)) == enemy.thisEnemyIndex).FirstOrDefault();
+
+                        if (name != null)
+                        {
+                            logger.LogDebug($"Found name: {name}");
+                            node.headerText = name;
+                            node.subText = enemy.enemyType.enemyName;
+                        }
+                    }
                 }
 
-                HUDManager.Instance.UpdateScanNodes(StartOfRound.Instance.localPlayerController);
+                //HUDManager.Instance.UpdateScanNodes(StartOfRound.Instance.localPlayerController);
             }
         }
     }

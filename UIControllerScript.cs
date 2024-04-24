@@ -389,12 +389,8 @@ namespace DeathNote
 
         private void BtnActivateEyesOnClick(ClickEvent evt)
         {
-            if (verifying)
-            {
-                verifying = false;
-            }
-            else { verifying = true; }
-
+            // TODO: implement
+            //btnActivateEyes.style
             logger.LogDebug("BtnActivateEyesOnClick");
         }
     }
