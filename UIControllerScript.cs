@@ -13,6 +13,7 @@ namespace DeathNote
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
+        public static PlayerControllerB localPlayer = StartOfRound.Instance.localPlayerController;
         public static UIControllerScript Instance { get; private set; }
         public VisualElement veMain;
         public ScrollView svRight;
@@ -128,6 +129,7 @@ namespace DeathNote
         private void Update()
         {
             if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
+            if (DeathController.ShinigamiEyesActivated == true && localPlayer.health > 50) { localPlayer.health = 50; }
         }
 
         public void ShowUI()
@@ -202,14 +204,16 @@ namespace DeathNote
             deathController.TimeOfDeathString = txtTimeOfDeath.text;
             float _timeOfDeath = ClockToTime(txtTimeOfDeath.text);
             if (_timeOfDeath == -1 || !(TimeOfDay.Instance.currentDayTime <= _timeOfDeath) || !(_timeOfDeath <= TimeOfDay.Instance.totalTime)) { 
-                deathController.KillPlayer();
+                if(deathController.PlayerToDie != null)
+                {
+                    deathController.KillPlayer();
+                }
+                else { deathController.KillEnemy(); }
             }
             else
             {
                 deathController.TimeOfDeath = _timeOfDeath;
-                logger.LogDebug("setting instance");
                 deathController.ui = Instance;
-                logger.LogDebug("instance set");
                 StartKillTimer(deathController);
             }
 
@@ -265,7 +269,35 @@ namespace DeathNote
             }
             else
             {
-                ShowResults("Could not find player to kill", 3, true);
+                string name = DeathController.EnemyNames.Where(x => x.ToLower() == txtPlayerUsername.text.ToLower()).FirstOrDefault();
+
+                if (name != null)
+                {
+                    int index = int.Parse(name.Substring(name.Length - 1));
+
+                    EnemyAI enemy = RoundManager.Instance.SpawnedEnemies.Where(x => x.thisEnemyIndex == index).FirstOrDefault();
+                    if (enemy == null) { logger.LogError($"Could not find enemy with index: {index}"); return; }
+
+                    if (enemy.isEnemyDead) { ShowResults("Enemy is already dead"); return; }
+                    logger.LogDebug($"Found enemy to kill: {name}");
+                    ShowResults($"Found enemy to kill: {name}", 3, true);
+
+                    DeathController deathController = new DeathController();
+                    deathController.EnemyName = name;
+                    deathController.EnemyToDie = enemy;
+
+                    txtPlayerUsername.isReadOnly = true;
+                    txtTimeOfDeath.style.display = DisplayStyle.Flex;
+                    txtTimeOfDeath.value = "";
+                    pbRemainingTime.style.display = DisplayStyle.Flex;
+
+                    verifying = true;
+                    StartProgressBarTimer(deathController);
+                }
+                else
+                {
+                    ShowResults("Could not find entity to kill", 3, true);
+                }
             }
         }
 
@@ -389,9 +421,14 @@ namespace DeathNote
 
         private void BtnActivateEyesOnClick(ClickEvent evt)
         {
-            // TODO: implement
-            //btnActivateEyes.style
             logger.LogDebug("BtnActivateEyesOnClick");
+
+            btnActivateEyes.style.display = DisplayStyle.None;
+            lblSEDescription.text = "You have the shinigami eyes. You can now see entity names. This will reset after the round is over.";
+            lblSEDescription.style.color = Color.red;
+
+            localPlayer.health = 50;
+            DeathController.ShinigamiEyesActivated = true;
         }
     }
 }

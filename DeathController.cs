@@ -33,13 +33,15 @@ namespace DeathNote
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
-        public static bool ShinigamiEyesActivated = true; // TODO: Set back to false
+        public static bool ShinigamiEyesActivated = false; // TODO: Set back to false
 
         public static List<string> EnemyNames = new List<string>();
+        public string EnemyName;
+        public EnemyAI EnemyToDie;
 
         public UIControllerScript ui;
 
-        public PlayerControllerB PlayerToDie;
+        public PlayerControllerB PlayerToDie = null;
         public string causeOfDeathString;
         public string detailsString;
 
@@ -151,10 +153,12 @@ namespace DeathNote
         {
             logger.LogDebug("In StartKillTimerCoroutine");
             yield return new WaitForSeconds(1f);
-            Label lblPlayerToDie = new Label();
-            //lblPlayerToDie.style.unityFont = DeathNoteBase.DNAssetBundle.LoadAsset<Font>("Assets/DeathNote/Death Note.ttf"); // TODO: figure out how to get this to work
-            lblPlayerToDie.text = $"{PlayerToDie.playerUsername}: {causeOfDeathString}, {ui.TimeToClock(TimeOfDeath)}";
-            lblPlayerToDie.style.color = Color.red;
+
+            Label lblEntityToDie = new Label();
+            //lblEntityToDie.style.unityFont = DeathNoteBase.DNAssetBundle.LoadAsset<Font>("Assets/DeathNote/Death Note.ttf"); // TODO: figure out how to get this to work
+            lblEntityToDie.style.color = Color.red;
+            if (PlayerToDie != null) { lblEntityToDie.text = $"{PlayerToDie.playerUsername}: {causeOfDeathString}, {ui.TimeToClock(TimeOfDeath)}"; }
+            else { lblEntityToDie.text = $"{EnemyName}: {ui.TimeToClock(TimeOfDeath)}"; }
 
             ProgressBar pbTimeToDie = new ProgressBar();
             pbTimeToDie.name = "pbTimeToDie";
@@ -163,7 +167,7 @@ namespace DeathNote
             pbTimeToDie.style.display = DisplayStyle.Flex;
             pbTimeToDie.title = "Remaining Time";
 
-            ui.svRight.Add(lblPlayerToDie);
+            ui.svRight.Add(lblEntityToDie);
             ui.svRight.Add(pbTimeToDie);
 
             if (pbTimeToDie == null) { logger.LogError("pbTimeToDie is null"); }
@@ -177,8 +181,9 @@ namespace DeathNote
                 yield return null;
             }
 
-            KillPlayer();
-            ui.svRight.Remove(lblPlayerToDie);
+            if (PlayerToDie == null) { KillPlayer(); } else { KillEnemy(); }
+
+            ui.svRight.Remove(lblEntityToDie);
             ui.svRight.Remove(pbTimeToDie);
         }
 
@@ -192,20 +197,10 @@ namespace DeathNote
 
         public void KillEnemy()
         {
-
+            EnemyToDie.KillEnemy();
         }
 
-        public static void GetEnemy()
-        {
-            
-
-            // TODO: implement, might not be needed
-            //public List<EnemyAI> SpawnedEnemies = new List<EnemyAI>();
-            // public List<int> scannedEnemyIDs = new List<int>();
-
-        }
-
-        public static List<SpawnableEnemyWithRarity> GetEnemyTypes()
+        /*public static List<SpawnableEnemyWithRarity> GetEnemyTypes() // TODO: might be unneeded
         {
             logger.LogDebug("Getting enemies");
             List<SpawnableEnemyWithRarity> enemies = new List<SpawnableEnemyWithRarity>();
@@ -219,6 +214,6 @@ namespace DeathNote
 
             logger.LogDebug($"Enemy types: {enemies.Count}");
             return enemies;
-        }
+        }*/
     }
 }

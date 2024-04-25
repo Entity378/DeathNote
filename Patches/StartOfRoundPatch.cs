@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HarmonyLib;
+﻿using HarmonyLib;
+using UnityEngine.UIElements;
 
 namespace DeathNote.Patches
 {
@@ -10,9 +8,12 @@ namespace DeathNote.Patches
     {
         [HarmonyPrefix]
         [HarmonyPatch("EndOfGame")]
-        private static void RefreshEnemiesListPrefix() // TODO: Make sure button highlight or display is changed back to normal when this is called
+        private static void EndOfGamePrefix()
         {
             DeathController.ShinigamiEyesActivated = false;
+            UIControllerScript.Instance.btnActivateEyes.style.display = DisplayStyle.Flex;
+            UIControllerScript.Instance.lblSEDescription.text = "You may, in exchange of half of your life, acquire the power of the Shinigami Eyes, which will enable you to see an entity's name when looking at them.";
+            UIControllerScript.Instance.lblSEDescription.style.color = UnityEngine.Color.black;
             DeathController.EnemyNames.Clear();
         }
     }

@@ -18,7 +18,6 @@ namespace DeathNote.Patches
         [HarmonyPatch("PingScan_performed")]
         public static void PingScan_performedPostFix()
         {
-            // Private List<ScanNodeProperties> nodesOnScreen = new List<ScanNodeProperties>();
             if (DeathController.ShinigamiEyesActivated)
             {
                 foreach (var node in HUDManager.Instance.nodesOnScreen) // TODO: Continue testing here
@@ -39,8 +38,6 @@ namespace DeathNote.Patches
                         }
                     }
                 }
-
-                //HUDManager.Instance.UpdateScanNodes(StartOfRound.Instance.localPlayerController);
             }
         }
     }
