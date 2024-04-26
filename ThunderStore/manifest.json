@@ -1,6 +1,6 @@
 {
   "name": "DeathNote",
-  "version_number": "0.3.0",
+  "version_number": "0.3.1",
   "website_url": "https://ko-fi.com/snowlance",
   "description": "V0.3.0: Shinigami Eyes, Killable Monsters, Configs and more! Adds the Death Note as a rare scrap item to kill your friends! Compatible with V50",
   "dependencies": [

@@ -16,7 +16,6 @@ Adds the Death Note as a rare scrap item to kill your friends with! Allows you t
 ## Upcoming Plans
 
 
-- Ability to kill monsters with their names
 - Animation when opening the book
 - Ability to specify a type of death after the players name, depending on the type, it will spawn any enemy that kills using that type to kill your target. The monster will have increased speed, health and damage. If it doesnt kill them in a certain amount of time, they will die from a heart attack.
 
