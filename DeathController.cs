@@ -15,7 +15,7 @@ namespace DeathNote
         public static bool ShinigamiEyesActivated = false;
 
         public static List<string> EnemyNames = new List<string>();
-        public string EnemyName;
+        public string? EnemyName;
         public EnemyAI EnemyToDie;
 
         public PlayerControllerB PlayerToDie = null;

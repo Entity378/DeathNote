@@ -20,7 +20,7 @@ namespace DeathNote
     {
         private const string modGUID = "Snowlance.DeathNote";
         private const string modName = "DeathNote";
-        private const string modVersion = "0.3.0";
+        private const string modVersion = "0.3.2";
 
         public static AssetBundle? DNAssetBundle;
 
@@ -111,10 +111,13 @@ namespace DeathNote
 
         private void Update()
         {
-            PlayerControllerB localPlayer = StartOfRound.Instance.localPlayerController;
-            if (DeathController.ShinigamiEyesActivated == true && localPlayer.health > (DeathController.HalfHealth))
+            if (StartOfRound.Instance != null && DeathController.ShinigamiEyesActivated)
             {
-                localPlayer.DamagePlayer(localPlayer.health - DeathController.HalfHealth, false, true, CauseOfDeath.Unknown, -1); // TODO: Test this more
+                PlayerControllerB localPlayer = StartOfRound.Instance.localPlayerController;
+                if (localPlayer.health > (DeathController.HalfHealth))
+                {
+                    localPlayer.DamagePlayer(localPlayer.health - DeathController.HalfHealth, false, true, CauseOfDeath.Unknown, -1); // TODO: Test this more
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using HarmonyLib;
+using System.Collections.Generic;
 using UnityEngine.UIElements;
 using static DeathNote.DeathNoteBase;
 
@@ -14,35 +15,25 @@ namespace DeathNote.Patches
         [HarmonyPatch("EndOfGame")]
         private static void EndOfGamePrefix()
         {
-            try
-            {
-                if (configShinigamiEyes.Value && !configPermanentEyes.Value) // get configs from tester and recreate error and fix it
-                {
-                    logger.LogDebug("In EndOfGamePrefix");
+            logger.LogDebug("In EndOfGamePrefix");
 
-                    DeathController.ShinigamiEyesActivated = false;
-                    UIControllerScript.Instance.btnActivateEyes.style.display = DisplayStyle.Flex;
-                    UIControllerScript.Instance.lblSEDescription.text = "You may, in exchange of half of your life, acquire the power of the Shinigami Eyes, which will enable you to see an entity's name when looking at them.\nThis will reset at the end of the round.";
-                    UIControllerScript.Instance.lblSEDescription.style.color = UnityEngine.Color.black;
-                    DeathController.EnemyNames.Clear();
-                }
-            }
-            catch (System.Exception)
+            if (configShinigamiEyes.Value && !configPermanentEyes.Value)
             {
-                logger.LogError("Error in EndOfGamePrefix");
-                return;
-            }
-
-            /*if (configShinigamiEyes.Value && !configPermanentEyes.Value) // get configs from tester and recreate error and fix it
-            {
-                logger.LogDebug("In EndOfGamePrefix");
+                logger.LogDebug("Passed config checks");
 
                 DeathController.ShinigamiEyesActivated = false;
+                logger.LogDebug("Set ShinigamiEyesActivated to false");
+                DeathController.EnemyNames = new List<string>();
+                logger.LogDebug("Cleared EnemyNames");
+
+                if (UIControllerScript.Instance == null) { return; }
                 UIControllerScript.Instance.btnActivateEyes.style.display = DisplayStyle.Flex;
                 UIControllerScript.Instance.lblSEDescription.text = "You may, in exchange of half of your life, acquire the power of the Shinigami Eyes, which will enable you to see an entity's name when looking at them.\nThis will reset at the end of the round.";
                 UIControllerScript.Instance.lblSEDescription.style.color = UnityEngine.Color.black;
-                DeathController.EnemyNames.Clear();
-            }*/
+                logger.LogDebug("Showed ShinigamiEyesActivated");
+
+                logger.LogDebug("Finished");
+            }
         }
     }
 }
