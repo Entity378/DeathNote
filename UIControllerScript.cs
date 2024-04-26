@@ -19,7 +19,7 @@ namespace DeathNote
 
         public VisualElement veMain;
         public ScrollView svRight;
-        public int timeRemaining = 40; // TODO: get this from config
+        public int timeRemaining = configTimerLength.Value;
         private bool verifying = false;
 
 
@@ -82,8 +82,8 @@ namespace DeathNote
             {
                 dpdnPlayerList = root.Q<DropdownField>("dpdnPlayerList");
                 if (dpdnPlayerList == null) { logger.LogError("dpdnPlayerList not found."); return; }
-                dpdnPlayerList.choices.Add("");
-                dpdnPlayerList.choices.AddRange(StartOfRound.Instance.allPlayerScripts.Select(x => x.playerUsername).ToList());
+                dpdnPlayerList.choices.Add(" ");
+                dpdnPlayerList.choices.AddRange(StartOfRound.Instance.allPlayerScripts.Where(x => x.isPlayerControlled).Select(x => x.playerUsername).ToList());
                 dpdnPlayerList.style.display = DisplayStyle.Flex;
             }
 
@@ -157,7 +157,6 @@ namespace DeathNote
                 dpdnDeathType.index = 0;
                 dpdnDetails.style.display = DisplayStyle.Flex;
                 dpdnDetails.index = 0;
-                pbRemainingTime.style.display = DisplayStyle.Flex;
             }
 
             logger.LogDebug("UIControllerScript: Start() complete");
@@ -165,12 +164,7 @@ namespace DeathNote
 
         private void Update()
         {
-            PlayerControllerB localPlayer = StartOfRound.Instance.localPlayerController;
             if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
-            if (DeathController.ShinigamiEyesActivated == true && localPlayer.health > (DeathController.HalfHealth))
-            {
-                localPlayer.DamagePlayer(localPlayer.health - DeathController.HalfHealth, false);
-            }
         }
 
         public void ShowUI()
@@ -285,8 +279,11 @@ namespace DeathNote
             // normalizedTime = currentDayTime / totalTime;
             logger.LogDebug("BtnSubmitOnClick");
 
-            if (verifying && configTimer.Value && configAllowEarlySubmit.Value)
+            if (StartOfRound.Instance.inShipPhase) { ShowResults("Ship must be landed to use this book", 5f, true); return; }
+
+            if (verifying && configTimer.Value)
             {
+                if (!configAllowEarlySubmit.Value) { return; }
                 float time = ClockToTime(txtTimeOfDeath.text);
                 if (time == -1)
                 {
@@ -300,7 +297,7 @@ namespace DeathNote
 
 
             deathController = new DeathController();
-            PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == txtName.text.ToLower()).FirstOrDefault(); // TODO: Add entity searching as well
+            PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == txtName.text.ToLower()).FirstOrDefault();
             string enemyName = DeathController.EnemyNames.Where(x => x.ToLower().Replace(" ", "") == txtName.text.ToLower().Replace(" ", "")).FirstOrDefault();
 
             
@@ -398,7 +395,6 @@ namespace DeathNote
 
                 verifying = true;
                 StartProgressBarTimer(deathController);
-                // TODO: Continue here
             }
         }
 

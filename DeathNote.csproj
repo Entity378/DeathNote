@@ -29,7 +29,7 @@
       <HintPath>..\1Resources\1Dependencies\LethalLib.dll</HintPath>
     </Reference>
     <Reference Include="LethalNetworkAPI">
-      <HintPath>..\1Lethal Company Debugging\BepInEx\plugins\LethalNetworkAPI.dll</HintPath>
+      <HintPath>..\1Resources\1Dependencies\LethalNetworkAPI.dll</HintPath>
     </Reference>
     <Reference Include="OdinSerializer">
       <HintPath>..\1Lethal Company Debugging\BepInEx\plugins\OdinSerializer.dll</HintPath>

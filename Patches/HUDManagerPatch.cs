@@ -22,7 +22,7 @@ namespace DeathNote.Patches
             {
                 logger.LogDebug($"Got {HUDManager.Instance.nodesOnScreen.Count} nodes");
 
-                foreach (var node in HUDManager.Instance.nodesOnScreen) // TODO: this isnt working as intented
+                foreach (var node in HUDManager.Instance.nodesOnScreen)
                 {
                     if(node.nodeType == 1)
                     {

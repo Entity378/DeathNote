@@ -28,15 +28,16 @@ namespace DeathNote
         public static ManualLogSource LoggerInstance;
         private readonly Harmony harmony = new Harmony(modGUID);
 
-        public static ConfigEntry<bool> configTimer;//
-        public static ConfigEntry<int> configTimerLength;//
-        public static ConfigEntry<bool> configAllowEarlySubmit;//
-        public static ConfigEntry<bool> configShowPlayerList;//
+        public static ConfigEntry<int> configRarity;
+        public static ConfigEntry<bool> configTimer;
+        public static ConfigEntry<int> configTimerLength;
+        public static ConfigEntry<bool> configAllowEarlySubmit;
+        public static ConfigEntry<bool> configShowPlayerList;
 
-        public static ConfigEntry<bool> configShinigamiEyes;//
-        public static ConfigEntry<bool> configPermanentEyes;//
+        public static ConfigEntry<bool> configShinigamiEyes;
+        public static ConfigEntry<bool> configPermanentEyes;
 
-        public static ConfigEntry<bool> configAlwaysShowPlayerNames;//
+        public static ConfigEntry<bool> configAlwaysShowPlayerNames;
         public static ConfigEntry<bool> configShowEnemyNames;
         public static ConfigEntry<bool> configShowUnkillableEnemyNames; // can break
 
@@ -52,6 +53,7 @@ namespace DeathNote
             LoggerInstance = PluginInstance.Logger;
             LoggerInstance.LogDebug($"Plugin {modName} loaded successfully.");
 
+            configRarity = Config.Bind("General", "Rarity", 5, "Rarity of the death note.");
             configTimer = Config.Bind("General", "Timer", true, "If picking the death details should have a time limit.\nWhen you enter a name and click submit, you'll have x in-game seconds to fill in a time and details before it adds the name to the book.");
             configTimerLength = Config.Bind("General", "Timer Length", 40, "Timer length. 40 is lore accurate.");
             configAllowEarlySubmit = Config.Bind("General", "Allow Early Submit", true, "Allows you to click submit again to add it to the book early. Turn this off if you want a cooldown mechanic.");
@@ -59,7 +61,7 @@ namespace DeathNote
             configShowPlayerList = Config.Bind("Accessibility", "Show PlayerList", false, "Show a dropdown list of players under the name input to select from instead.");
 
             configShinigamiEyes = Config.Bind("Shinigami Eyes", "Shinigami Eyes", true, "Allows you to trade half of your max health for the ability to see certain entity names (configurable in Names section).\nEnemy names require you to scan them.");
-            configPermanentEyes = Config.Bind("Shinigami Eyes", "Permanent Eyes", true, "Makes Shinigami Eyes permanent. Disabling this will reset the ability at the end of every round.");
+            configPermanentEyes = Config.Bind("Shinigami Eyes", "Permanent Eyes", false, "Makes Shinigami Eyes permanent. Disabling this will reset the ability at the end of every round.");
 
             configAlwaysShowPlayerNames = Config.Bind("Names", "AlwaysShowPlayerNames", false, "Always shows player names above their head. Disabling this will only show player names when you have the Shinigami Eyes.");
             configShowEnemyNames = Config.Bind("Names", "ShowEnemyNames", true, "Allows you to see enemy names when scanning them if you have the Shinigami Eyes.");
@@ -95,7 +97,7 @@ namespace DeathNote
             LoggerInstance.LogDebug("Got UIControllerScript");
 
             // Register Scrap
-            int iRarity = 1000;
+            int iRarity = configRarity.Value;
             NetworkPrefabs.RegisterNetworkPrefab(DeathNote.spawnPrefab);
             Utilities.FixMixerGroups(DeathNote.spawnPrefab);
             Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All);
@@ -105,6 +107,15 @@ namespace DeathNote
             harmony.PatchAll();
             
             LoggerInstance.LogInfo($"{modGUID} v{modVersion} has loaded!");
+        }
+
+        private void Update()
+        {
+            PlayerControllerB localPlayer = StartOfRound.Instance.localPlayerController;
+            if (DeathController.ShinigamiEyesActivated == true && localPlayer.health > (DeathController.HalfHealth))
+            {
+                localPlayer.DamagePlayer(localPlayer.health - DeathController.HalfHealth, false, true, CauseOfDeath.Unknown, -1); // TODO: Test this more
+            }
         }
     }
 }

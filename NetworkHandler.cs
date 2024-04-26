@@ -40,7 +40,7 @@ namespace DeathNote
             CauseOfDeath causeOfDeath = DeathController.GetCauseOfDeathFromString(info[1]);
 
             int details = DeathController.Details.IndexOf(info[2]);
-            logger.LogInfo($"Details: {details}");
+            logger.LogDebug($"Details: {details}");
             if (details == 4)
             {
                 playerToDie.KillPlayer(new Vector3(), false, causeOfDeath);

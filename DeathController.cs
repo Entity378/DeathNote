@@ -1,30 +1,9 @@
-﻿using BepInEx;
-using BepInEx.Logging;
-using DeathNote;
-using GameNetcodeStuff;
-using LethalLib.Modules;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using UnityEngine.UIElements;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
-using UnityEngine;
-using UnityEngine.UIElements;
-using UnityEngine.Windows;
-using UnityEngine.InputSystem;
-using DeathNote;
-using BepInEx.Logging;
-using UnityEngine.InputSystem.XR;
-using LethalLib.Modules;
-using System.Linq;
+﻿using BepInEx.Logging;
 using GameNetcodeStuff;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UIElements;
 //using TMPro;
 
 namespace DeathNote
@@ -33,7 +12,7 @@ namespace DeathNote
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
-        public static bool ShinigamiEyesActivated = false; // TODO: Set back to false
+        public static bool ShinigamiEyesActivated = false;
 
         public static List<string> EnemyNames = new List<string>();
         public string EnemyName;
