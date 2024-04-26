@@ -18,18 +18,23 @@ namespace DeathNote.Patches
         [HarmonyPatch("PingScan_performed")]
         public static void PingScan_performedPostFix()
         {
-            if (DeathController.ShinigamiEyesActivated)
+            if (DeathController.ShinigamiEyesActivated && DeathNoteBase.configShowEnemyNames.Value)
             {
-                foreach (var node in HUDManager.Instance.nodesOnScreen) // TODO: Continue testing here
+                logger.LogDebug($"Got {HUDManager.Instance.nodesOnScreen.Count} nodes");
+
+                foreach (var node in HUDManager.Instance.nodesOnScreen) // TODO: this isnt working as intented
                 {
                     if(node.nodeType == 1)
                     {
                         logger.LogDebug($"{node.nodeType} {node.headerText} {node.subText}");
 
                         EnemyAI enemy = node.gameObject.GetComponentInParent<EnemyAI>();
-                        logger.LogDebug($"Got enemy from scannode:{enemy.thisEnemyIndex}: {enemy.enemyType.enemyName}");
-                        string name = DeathController.EnemyNames.Where(x => int.Parse(x.Substring(x.Length - 1)) == enemy.thisEnemyIndex).FirstOrDefault();
 
+                        if (!DeathNoteBase.configShowUnkillableEnemyNames.Value && !enemy.enemyType.canDie) { continue; }
+
+                        logger.LogDebug($"Got enemy from scannode:{enemy.thisEnemyIndex}: {enemy.enemyType.enemyName}");
+                        string name = DeathController.EnemyNames.Where(x => int.Parse(x.Substring(x.LastIndexOf('-') + 1)) == enemy.thisEnemyIndex).FirstOrDefault();
+                        
                         if (name != null)
                         {
                             logger.LogDebug($"Found name: {name}");

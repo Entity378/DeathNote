@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
+using static DeathNote.DeathNoteBase;
 //using TMPro;
 
 namespace DeathNote
@@ -13,8 +14,9 @@ namespace DeathNote
     {
         private static ManualLogSource logger = DeathNoteBase.LoggerInstance;
 
-        public static PlayerControllerB localPlayer = StartOfRound.Instance.localPlayerController;
-        public static UIControllerScript Instance { get; private set; }
+        public static UIControllerScript Instance;
+        private DeathController deathController;
+
         public VisualElement veMain;
         public ScrollView svRight;
         public int timeRemaining = 40; // TODO: get this from config
@@ -22,12 +24,14 @@ namespace DeathNote
 
 
         public Label lblResult;
-        public TextField txtPlayerUsername;
+        public TextField txtName;
+        public DropdownField dpdnPlayerList;
         public Button btnSubmit;
         public TextField txtTimeOfDeath;
         public DropdownField dpdnDeathType;
         public DropdownField dpdnDetails;
         public ProgressBar pbRemainingTime;
+        public Label lblSETitle;
         public Label lblSEDescription;
         public Button btnActivateEyes;
 
@@ -39,6 +43,8 @@ namespace DeathNote
             {
                 Instance = this;
             }
+
+            timeRemaining = configTimerLength.Value;
 
             // Get UIDocument
             logger.LogDebug("Getting UIDocument");
@@ -69,8 +75,17 @@ namespace DeathNote
             lblResult = root.Q<Label>("lblResult");
             if (lblResult == null) { logger.LogError("lblResult not found."); return; }
 
-            txtPlayerUsername = root.Q<TextField>("txtPlayerUsername");
-            if (txtPlayerUsername == null) { logger.LogError("txtPlayerUsername not found."); return; }
+            txtName = root.Q<TextField>("txtName");
+            if (txtName == null) { logger.LogError("txtName not found."); return; }
+
+            if (configShowPlayerList.Value)
+            {
+                dpdnPlayerList = root.Q<DropdownField>("dpdnPlayerList");
+                if (dpdnPlayerList == null) { logger.LogError("dpdnPlayerList not found."); return; }
+                dpdnPlayerList.choices.Add("");
+                dpdnPlayerList.choices.AddRange(StartOfRound.Instance.allPlayerScripts.Select(x => x.playerUsername).ToList());
+                dpdnPlayerList.style.display = DisplayStyle.Flex;
+            }
 
             btnSubmit = root.Q<Button>("btnSubmit");
             if (btnSubmit == null) { logger.LogError("btnSubmit not found."); return; }
@@ -88,8 +103,12 @@ namespace DeathNote
             dpdnDetails.choices = DeathController.Details;
             dpdnDetails.index = 0;
 
+            lblSETitle = root.Q<Label>("lblSETitle");
+            if (lblSETitle == null) { logger.LogError("lblSETitle not found."); return; }
+
             lblSEDescription = root.Q<Label>("lblSEDescription");
             if (lblSEDescription == null) { logger.LogError("lblSEDescription not found."); return; }
+            if (configPermanentEyes.Value) { lblSEDescription.text += "\nWARNING: This is permanent!"; } else { lblSEDescription.text += "\nThis will reset at the end of the round."; }
 
             btnActivateEyes = root.Q<Button>("btnActivateEyes");
             if (btnActivateEyes == null) { logger.LogError("btnActivateEyes not found."); return; }
@@ -115,27 +134,51 @@ namespace DeathNote
 
             btnActivateEyes = root.Q<Button>("btnActivateEyes");
             if (btnActivateEyes == null) { logger.LogError("btnActivateEyes not found."); return; }
-
+            
+            if (!configShinigamiEyes.Value)
+            {
+                btnActivateEyes.style.display = DisplayStyle.None;
+                lblSETitle.style.display = DisplayStyle.None;
+                lblSEDescription.style.display = DisplayStyle.None;
+            }
+            
             logger.LogDebug("Got Controls for UI");
 
             // Add event handlers
             btnSubmit.clickable.clicked += BtnSubmitOnClick;
             btnActivateEyes.RegisterCallback<ClickEvent>(BtnActivateEyesOnClick);
-            txtPlayerUsername.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
+            txtName.RegisterCallback<KeyUpEvent>(txtPlayerUsernameOnValueChanged);
+
+            if (!configTimer.Value)
+            {
+                txtTimeOfDeath.style.display = DisplayStyle.Flex;
+                txtTimeOfDeath.value = "";
+                dpdnDeathType.style.display = DisplayStyle.Flex;
+                dpdnDeathType.index = 0;
+                dpdnDetails.style.display = DisplayStyle.Flex;
+                dpdnDetails.index = 0;
+                pbRemainingTime.style.display = DisplayStyle.Flex;
+            }
 
             logger.LogDebug("UIControllerScript: Start() complete");
         }
 
         private void Update()
         {
+            PlayerControllerB localPlayer = StartOfRound.Instance.localPlayerController;
             if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
-            if (DeathController.ShinigamiEyesActivated == true && localPlayer.health > 50) { localPlayer.health = 50; }
+            if (DeathController.ShinigamiEyesActivated == true && localPlayer.health > (DeathController.HalfHealth))
+            {
+                localPlayer.DamagePlayer(localPlayer.health - DeathController.HalfHealth, false);
+            }
         }
 
         public void ShowUI()
         {
             logger.LogDebug("Showing UI");
             veMain.style.display = DisplayStyle.Flex;
+
+            if (DeathController.ShinigamiEyesActivated == true) { btnActivateEyes.style.display = DisplayStyle.None; }
 
             UnityEngine.Cursor.lockState = CursorLockMode.None;
             UnityEngine.Cursor.visible = true;
@@ -158,18 +201,24 @@ namespace DeathNote
 
         public void ResetUI()
         {
-            txtPlayerUsername.value = "";
-            txtPlayerUsername.isReadOnly = false;
-            txtTimeOfDeath.style.display = DisplayStyle.None;
+            txtName.value = "";
+            txtName.isReadOnly = false;
             txtTimeOfDeath.value = "";
-            dpdnDeathType.style.display = DisplayStyle.None;
             dpdnDeathType.index = 0;
-            dpdnDetails.style.display = DisplayStyle.None;
             dpdnDetails.index = 0;
             pbRemainingTime.style.display = DisplayStyle.None;
             pbRemainingTime.highValue = 0;
             pbRemainingTime.lowValue = 0;
             pbRemainingTime.value = 0;
+
+            if (configTimer.Value)
+            {
+                dpdnDeathType.style.display = DisplayStyle.None;
+                dpdnDetails.style.display = DisplayStyle.None;
+                txtTimeOfDeath.style.display = DisplayStyle.None;
+            }
+
+            if (configShowPlayerList.Value) { dpdnPlayerList.index = 0; }
 
             verifying = false;
         }
@@ -197,24 +246,29 @@ namespace DeathNote
                 yield return null;
             }
 
-
-            deathController.causeOfDeathString = dpdnDeathType.value;
-            deathController.detailsString = dpdnDetails.value;
-            
-            deathController.TimeOfDeathString = txtTimeOfDeath.text;
-            float _timeOfDeath = ClockToTime(txtTimeOfDeath.text);
-            if (_timeOfDeath == -1 || !(TimeOfDay.Instance.currentDayTime <= _timeOfDeath) || !(_timeOfDeath <= TimeOfDay.Instance.totalTime)) { 
-                if(deathController.PlayerToDie != null)
-                {
-                    deathController.KillPlayer();
-                }
-                else { deathController.KillEnemy(); }
-            }
-            else
+            if (!deathController.IsEntityDead())
             {
-                deathController.TimeOfDeath = _timeOfDeath;
-                deathController.ui = Instance;
-                StartKillTimer(deathController);
+                deathController.causeOfDeathString = dpdnDeathType.value;
+                deathController.detailsString = dpdnDetails.value;
+
+                deathController.TimeOfDeathString = txtTimeOfDeath.text;
+                float _timeOfDeath = ClockToTime(txtTimeOfDeath.text);
+                if (_timeOfDeath == -1 || !(TimeOfDay.Instance.currentDayTime < _timeOfDeath) || !(_timeOfDeath < TimeOfDay.Instance.totalTime))
+                {
+                    if (deathController.PlayerToDie != null)
+                    {
+                        deathController.KillPlayer();
+                    }
+                    else
+                    {
+                        deathController.KillEnemy();
+                    }
+                }
+                else
+                {
+                    deathController.TimeOfDeath = _timeOfDeath;
+                    StartKillTimer(deathController);
+                }
             }
 
             ResetUI();
@@ -231,31 +285,109 @@ namespace DeathNote
             // normalizedTime = currentDayTime / totalTime;
             logger.LogDebug("BtnSubmitOnClick");
 
-            if (verifying)
+            if (verifying && configTimer.Value && configAllowEarlySubmit.Value)
             {
                 float time = ClockToTime(txtTimeOfDeath.text);
                 if (time == -1)
                 {
-                    ShowResults("Wrong time format or out of reach. Format: 00:00AM/PM", 5, true);
+                    ShowResults("Wrong time format or out of reach. Format: 00:00AM/PM", 5, false);
                     return;
                 }
 
                 verifying = false;
                 return;
             }
-            
-            PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == txtPlayerUsername.text.ToLower()).FirstOrDefault(); // TODO: Add entity searching as well
 
-            if (playerToDie != null)
+
+            deathController = new DeathController();
+            PlayerControllerB playerToDie = StartOfRound.Instance.allPlayerScripts.ToList().Where(x => x.playerUsername.ToLower() == txtName.text.ToLower()).FirstOrDefault(); // TODO: Add entity searching as well
+            string enemyName = DeathController.EnemyNames.Where(x => x.ToLower().Replace(" ", "") == txtName.text.ToLower().Replace(" ", "")).FirstOrDefault();
+
+            
+            if (enemyName != null)
             {
+                int index = int.Parse(enemyName.Substring(enemyName.LastIndexOf('-') + 1));
+
+                EnemyAI enemy = RoundManager.Instance.SpawnedEnemies.Where(x => x.thisEnemyIndex == index).FirstOrDefault();
+                if (enemy == null) { logger.LogError($"Could not find enemy with index: {index}"); ShowResults("Error: Could not find entity to kill", 5, true); return; }
+
+                if (enemy.isEnemyDead) { ShowResults("Enemy is already dead"); return; }
+                logger.LogDebug($"Found enemy to kill: {enemyName}");
+                ShowResults($"Found enemy to kill: {enemyName}", 5, true);
+
+                deathController.EnemyName = enemyName;
+                deathController.EnemyToDie = enemy;
+
+                if (!configTimer.Value)
+                {
+                    deathController.TimeOfDeathString = txtTimeOfDeath.text;
+                    float _timeOfDeath = ClockToTime(txtTimeOfDeath.text);
+                    if (_timeOfDeath == -1 || !(TimeOfDay.Instance.currentDayTime < _timeOfDeath) || !(_timeOfDeath < TimeOfDay.Instance.totalTime))
+                    {
+                        deathController.KillEnemy();
+                    }
+                    else
+                    {
+                        deathController.TimeOfDeath = _timeOfDeath;
+                        StartKillTimer(deathController);
+                    }
+
+                    ResetUI();
+                    return;
+                }
+
+                txtName.isReadOnly = true;
+                txtTimeOfDeath.style.display = DisplayStyle.Flex;
+                txtTimeOfDeath.value = "";
+                pbRemainingTime.style.display = DisplayStyle.Flex;
+
+                verifying = true;
+                StartProgressBarTimer(deathController);
+            }
+            else
+            {
+                if (playerToDie == null)
+                {
+                    if (!configShowPlayerList.Value || dpdnPlayerList.value == "")
+                    {
+                        ShowResults("Could not find entity!", 5f, true);
+                        return;
+                    }
+                    else
+                    {
+                        playerToDie = StartOfRound.Instance.allPlayerScripts.Where(x => x.playerUsername == dpdnPlayerList.value).FirstOrDefault();
+                        if (playerToDie == null) { logger.LogError("Couldnt find playerToDie in btnSubmitOnClick"); }
+                    }
+                }
+
                 if (playerToDie.isPlayerDead) { ShowResults("Player is already dead"); return; }
                 logger.LogDebug($"Found player to kill: {playerToDie.playerUsername}");
-                ShowResults($"Found player to kill: {playerToDie.playerUsername}", 3, true);
+                ShowResults($"Found player to kill: {playerToDie.playerUsername}", 5, true);
 
-                DeathController deathController = new DeathController();
                 deathController.PlayerToDie = playerToDie;
-                
-                txtPlayerUsername.isReadOnly = true;
+
+                if (!configTimer.Value)
+                {
+                    deathController.causeOfDeathString = dpdnDeathType.value;
+                    deathController.detailsString = dpdnDetails.value;
+
+                    deathController.TimeOfDeathString = txtTimeOfDeath.text;
+                    float _timeOfDeath = ClockToTime(txtTimeOfDeath.text);
+                    if (_timeOfDeath == -1 || !(TimeOfDay.Instance.currentDayTime < _timeOfDeath) || !(_timeOfDeath < TimeOfDay.Instance.totalTime))
+                    {
+                        deathController.KillPlayer();
+                    }
+                    else
+                    {
+                        deathController.TimeOfDeath = _timeOfDeath;
+                        StartKillTimer(deathController);
+                    }
+
+                    ResetUI();
+                    return;
+                }
+
+                txtName.isReadOnly = true;
                 txtTimeOfDeath.style.display = DisplayStyle.Flex;
                 txtTimeOfDeath.value = "";
                 dpdnDeathType.style.display = DisplayStyle.Flex;
@@ -266,38 +398,7 @@ namespace DeathNote
 
                 verifying = true;
                 StartProgressBarTimer(deathController);
-            }
-            else
-            {
-                string name = DeathController.EnemyNames.Where(x => x.ToLower() == txtPlayerUsername.text.ToLower()).FirstOrDefault();
-
-                if (name != null)
-                {
-                    int index = int.Parse(name.Substring(name.Length - 1));
-
-                    EnemyAI enemy = RoundManager.Instance.SpawnedEnemies.Where(x => x.thisEnemyIndex == index).FirstOrDefault();
-                    if (enemy == null) { logger.LogError($"Could not find enemy with index: {index}"); return; }
-
-                    if (enemy.isEnemyDead) { ShowResults("Enemy is already dead"); return; }
-                    logger.LogDebug($"Found enemy to kill: {name}");
-                    ShowResults($"Found enemy to kill: {name}", 3, true);
-
-                    DeathController deathController = new DeathController();
-                    deathController.EnemyName = name;
-                    deathController.EnemyToDie = enemy;
-
-                    txtPlayerUsername.isReadOnly = true;
-                    txtTimeOfDeath.style.display = DisplayStyle.Flex;
-                    txtTimeOfDeath.value = "";
-                    pbRemainingTime.style.display = DisplayStyle.Flex;
-
-                    verifying = true;
-                    StartProgressBarTimer(deathController);
-                }
-                else
-                {
-                    ShowResults("Could not find entity to kill", 3, true);
-                }
+                // TODO: Continue here
             }
         }
 
@@ -427,7 +528,6 @@ namespace DeathNote
             lblSEDescription.text = "You have the shinigami eyes. You can now see entity names. This will reset after the round is over.";
             lblSEDescription.style.color = Color.red;
 
-            localPlayer.health = 50;
             DeathController.ShinigamiEyesActivated = true;
         }
     }

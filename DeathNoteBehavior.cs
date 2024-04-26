@@ -32,6 +32,13 @@ namespace DeathNote
                 
                 if (uiController.veMain.style.display == DisplayStyle.None)
                 {
+                    if (DeathController.ShinigamiEyesActivated)
+                    {
+                        uiController.btnActivateEyes.style.display = DisplayStyle.None;
+                        uiController.lblSEDescription.text = "You have the shinigami eyes. You can now see entity names. This will reset after the round is over.";
+                        uiController.lblSEDescription.style.color = Color.red;
+                    }
+
                     logger.LogDebug("Showing UI");
                     uiController.ShowUI();
                 }

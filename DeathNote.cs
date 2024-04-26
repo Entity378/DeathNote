@@ -20,7 +20,7 @@ namespace DeathNote
     {
         private const string modGUID = "Snowlance.DeathNote";
         private const string modName = "DeathNote";
-        private const string modVersion = "0.2.1";
+        private const string modVersion = "0.3.0";
 
         public static AssetBundle? DNAssetBundle;
 
@@ -28,8 +28,19 @@ namespace DeathNote
         public static ManualLogSource LoggerInstance;
         private readonly Harmony harmony = new Harmony(modGUID);
 
-        //public static ConfigEntry<float> configVolume;
+        public static ConfigEntry<bool> configTimer;//
+        public static ConfigEntry<int> configTimerLength;//
+        public static ConfigEntry<bool> configAllowEarlySubmit;//
+        public static ConfigEntry<bool> configShowPlayerList;//
 
+        public static ConfigEntry<bool> configShinigamiEyes;//
+        public static ConfigEntry<bool> configPermanentEyes;//
+
+        public static ConfigEntry<bool> configAlwaysShowPlayerNames;//
+        public static ConfigEntry<bool> configShowEnemyNames;
+        public static ConfigEntry<bool> configShowUnkillableEnemyNames; // can break
+
+        //public static ConfigEntry<string> configCustomNames;
 
         private void Awake()
         {
@@ -40,6 +51,19 @@ namespace DeathNote
 
             LoggerInstance = PluginInstance.Logger;
             LoggerInstance.LogDebug($"Plugin {modName} loaded successfully.");
+
+            configTimer = Config.Bind("General", "Timer", true, "If picking the death details should have a time limit.\nWhen you enter a name and click submit, you'll have x in-game seconds to fill in a time and details before it adds the name to the book.");
+            configTimerLength = Config.Bind("General", "Timer Length", 40, "Timer length. 40 is lore accurate.");
+            configAllowEarlySubmit = Config.Bind("General", "Allow Early Submit", true, "Allows you to click submit again to add it to the book early. Turn this off if you want a cooldown mechanic.");
+            
+            configShowPlayerList = Config.Bind("Accessibility", "Show PlayerList", false, "Show a dropdown list of players under the name input to select from instead.");
+
+            configShinigamiEyes = Config.Bind("Shinigami Eyes", "Shinigami Eyes", true, "Allows you to trade half of your max health for the ability to see certain entity names (configurable in Names section).\nEnemy names require you to scan them.");
+            configPermanentEyes = Config.Bind("Shinigami Eyes", "Permanent Eyes", true, "Makes Shinigami Eyes permanent. Disabling this will reset the ability at the end of every round.");
+
+            configAlwaysShowPlayerNames = Config.Bind("Names", "AlwaysShowPlayerNames", false, "Always shows player names above their head. Disabling this will only show player names when you have the Shinigami Eyes.");
+            configShowEnemyNames = Config.Bind("Names", "ShowEnemyNames", true, "Allows you to see enemy names when scanning them if you have the Shinigami Eyes.");
+            configShowUnkillableEnemyNames = Config.Bind("Names", "ShowUnkillableEnemyNames", false, "Allows you to see the names of enemies that are immortal. WARNING: Killing them can break things or cause bugs.");
 
             // Loading assets
             string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -66,7 +90,7 @@ namespace DeathNote
 
             // Assign UIControllerScript
             LoggerInstance.LogDebug("Setting up UI");
-            UIControllerScript uiController = DeathNote.spawnPrefab.AddComponent<UIControllerScript>();
+            UIControllerScript uiController = DeathNote.spawnPrefab.AddComponent<UIControllerScript>(); // WHY TF IS THIS BREAKING NOW
             if (uiController == null) { LoggerInstance.LogError("uiController not found."); return; }
             LoggerInstance.LogDebug("Got UIControllerScript");
 
@@ -77,8 +101,6 @@ namespace DeathNote
             Items.RegisterScrap(DeathNote, iRarity, Levels.LevelTypes.All);
             
             NetworkHandler.Init();
-
-            //exampleConfigforlater = Config.Bind("", "", , "");
 
             harmony.PatchAll();
             

@@ -39,9 +39,9 @@ namespace DeathNote
         public string EnemyName;
         public EnemyAI EnemyToDie;
 
-        public UIControllerScript ui;
-
         public PlayerControllerB PlayerToDie = null;
+        public static int MaxHealth = 100;
+        public static int HalfHealth = MaxHealth / 2;
         public string causeOfDeathString;
         public string detailsString;
 
@@ -144,21 +144,17 @@ namespace DeathNote
             return _causeOfDeath;
         }
 
-        /*public static string GetDetailsAsIndex(string _details)
-        {
-            int index = GetCauseOfDeathsAsStrings().IndexOf(_details);
-        }*/
-
         public IEnumerator StartKillTimerCoroutine()
         {
             logger.LogDebug("In StartKillTimerCoroutine");
-            yield return new WaitForSeconds(1f);
 
             Label lblEntityToDie = new Label();
             //lblEntityToDie.style.unityFont = DeathNoteBase.DNAssetBundle.LoadAsset<Font>("Assets/DeathNote/Death Note.ttf"); // TODO: figure out how to get this to work
             lblEntityToDie.style.color = Color.red;
-            if (PlayerToDie != null) { lblEntityToDie.text = $"{PlayerToDie.playerUsername}: {causeOfDeathString}, {ui.TimeToClock(TimeOfDeath)}"; }
-            else { lblEntityToDie.text = $"{EnemyName}: {ui.TimeToClock(TimeOfDeath)}"; }
+            if (PlayerToDie != null) { lblEntityToDie.text = $"{PlayerToDie.playerUsername}: {causeOfDeathString}, {UIControllerScript.Instance.TimeToClock(TimeOfDeath)}"; }
+            else { lblEntityToDie.text = $"{EnemyName}: {UIControllerScript.Instance.TimeToClock(TimeOfDeath)}"; }
+
+            if (lblEntityToDie == null) { logger.LogError("lblEntityToDie is null"); }
 
             ProgressBar pbTimeToDie = new ProgressBar();
             pbTimeToDie.name = "pbTimeToDie";
@@ -167,28 +163,45 @@ namespace DeathNote
             pbTimeToDie.style.display = DisplayStyle.Flex;
             pbTimeToDie.title = "Remaining Time";
 
-            ui.svRight.Add(lblEntityToDie);
-            ui.svRight.Add(pbTimeToDie);
-
+            UIControllerScript.Instance.svRight.Add(lblEntityToDie);
+            UIControllerScript.Instance.svRight.Add(pbTimeToDie);
+            
             if (pbTimeToDie == null) { logger.LogError("pbTimeToDie is null"); }
 
             float elapsedTime = 0f;
 
             while (pbTimeToDie.value < pbTimeToDie.highValue)
             {
+                if(IsEntityDead()) { break; }
+
                 elapsedTime += Time.deltaTime * TimeOfDay.Instance.globalTimeSpeedMultiplier;
                 pbTimeToDie.value = Mathf.Lerp(pbTimeToDie.lowValue, pbTimeToDie.highValue, elapsedTime / pbTimeToDie.highValue);
                 yield return null;
             }
 
-            if (PlayerToDie == null) { KillPlayer(); } else { KillEnemy(); }
+            UIControllerScript.Instance.svRight.Remove(lblEntityToDie);
+            UIControllerScript.Instance.svRight.Remove(pbTimeToDie);
 
-            ui.svRight.Remove(lblEntityToDie);
-            ui.svRight.Remove(pbTimeToDie);
+            if (PlayerToDie != null) { KillPlayer(); } else { KillEnemy(); }
+        }
+
+        public bool IsEntityDead()
+        {
+            if (PlayerToDie != null)
+            {
+                if (PlayerToDie.isPlayerDead) { return true; }
+            }
+            else
+            {
+                if (EnemyToDie.isEnemyDead) { return true; }
+            }
+
+            return false;
         }
 
         public void KillPlayer()
         {
+            if (PlayerToDie.isPlayerDead) { UIControllerScript.Instance.ShowResults($"{PlayerToDie.playerUsername} has died already."); return; }
             logger.LogDebug($"Killing player {PlayerToDie.playerUsername}: {causeOfDeathString}, {TimeOfDeathString}");
 
             string[] info = { PlayerToDie.actualClientId.ToString(), causeOfDeathString, detailsString };
@@ -197,23 +210,16 @@ namespace DeathNote
 
         public void KillEnemy()
         {
-            EnemyToDie.KillEnemy();
+            if (IsEntityDead()) { UIControllerScript.Instance.ShowResults($"{EnemyName} has died already."); return; }
+
+            try
+            {
+                EnemyToDie.KillEnemyOnOwnerClient();
+            }
+            catch
+            {
+                EnemyToDie.KillEnemy();
+            }
         }
-
-        /*public static List<SpawnableEnemyWithRarity> GetEnemyTypes() // TODO: might be unneeded
-        {
-            logger.LogDebug("Getting enemies");
-            List<SpawnableEnemyWithRarity> enemies = new List<SpawnableEnemyWithRarity>();
-            enemies = GameObject.Find("Terminal")
-                .GetComponentInChildren<Terminal>()
-                .moonsCatalogueList
-                .SelectMany(x => x.Enemies.Concat(x.DaytimeEnemies).Concat(x.OutsideEnemies))
-                .Where(x => x != null && x.enemyType != null && x.enemyType.name != null)
-                .GroupBy(x => x.enemyType.name, (k, v) => v.First())
-                .ToList();
-
-            logger.LogDebug($"Enemy types: {enemies.Count}");
-            return enemies;
-        }*/
     }
 }

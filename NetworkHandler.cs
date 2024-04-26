@@ -47,7 +47,7 @@ namespace DeathNote
                 return;
             }
 
-            playerToDie.KillPlayer(new Vector3(), true, causeOfDeath, details); // TODO: This makes player go into the floor???
+            playerToDie.KillPlayer(new Vector3(), true, causeOfDeath, details);
         }
 
         private static void RecieveFromClient(string[] info, ulong clientID)

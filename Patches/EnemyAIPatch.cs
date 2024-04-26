@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine.UIElements;
 using static UnityEngine.EventSystems.EventTrigger;
+using static DeathNote.DeathNoteBase;
 
 namespace DeathNote.Patches
 {
@@ -19,6 +20,7 @@ namespace DeathNote.Patches
         private static void StartPostFix(EnemyAI __instance)
         {
             string enemyName = __instance.enemyType.enemyName + new Random().Next(100, 1000).ToString() + "-" + __instance.thisEnemyIndex;
+            logger.LogDebug($"Adding name: {enemyName}");
             DeathController.EnemyNames.Add(enemyName);
         }
     }
