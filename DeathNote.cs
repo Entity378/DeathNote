@@ -20,7 +20,7 @@ namespace DeathNote
     {
         private const string modGUID = "Snowlance.DeathNote";
         private const string modName = "DeathNote";
-        private const string modVersion = "0.3.2";
+        private const string modVersion = "0.3.3";
 
         public static AssetBundle? DNAssetBundle;
 
@@ -39,7 +39,9 @@ namespace DeathNote
 
         public static ConfigEntry<bool> configAlwaysShowPlayerNames;
         public static ConfigEntry<bool> configShowEnemyNames;
-        public static ConfigEntry<bool> configShowUnkillableEnemyNames; // can break
+
+        public static ConfigEntry<bool> configShowUnkillableEnemyNames;
+        public static ConfigEntry<bool> configLockUI;
 
         //public static ConfigEntry<string> configCustomNames;
 
@@ -63,9 +65,11 @@ namespace DeathNote
             configShinigamiEyes = Config.Bind("Shinigami Eyes", "Shinigami Eyes", true, "Allows you to trade half of your max health for the ability to see certain entity names (configurable in Names section).\nEnemy names require you to scan them.");
             configPermanentEyes = Config.Bind("Shinigami Eyes", "Permanent Eyes", false, "Makes Shinigami Eyes permanent. Disabling this will reset the ability at the end of every round.");
 
-            configAlwaysShowPlayerNames = Config.Bind("Names", "AlwaysShowPlayerNames", false, "Always shows player names above their head. Disabling this will only show player names when you have the Shinigami Eyes.");
+            configAlwaysShowPlayerNames = Config.Bind("Names", "Always Show Player Names", false, "Always shows player names above their head. Disabling this will only show player names when you have the Shinigami Eyes.");
             configShowEnemyNames = Config.Bind("Names", "ShowEnemyNames", true, "Allows you to see enemy names when scanning them if you have the Shinigami Eyes.");
-            configShowUnkillableEnemyNames = Config.Bind("Names", "ShowUnkillableEnemyNames", false, "Allows you to see the names of enemies that are immortal. WARNING: Killing them can break things or cause bugs.");
+            
+            configShowUnkillableEnemyNames = Config.Bind("Experimental", "Show Unkillable Enemy Names", false, "Allows you to see the names of enemies that are immortal. WARNING: Killing them can break things or cause bugs.");
+            configLockUI = Config.Bind("Experimental", "Lock UI", false, "Locks the UI when showing it which should help with renabling input when pressing certain keybinds.");
 
             // Loading assets
             string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

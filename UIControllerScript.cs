@@ -21,6 +21,7 @@ namespace DeathNote
         public ScrollView svRight;
         public int timeRemaining = configTimerLength.Value;
         private bool verifying = false;
+        private bool showingUI = false;
 
 
         public Label lblResult;
@@ -165,11 +166,20 @@ namespace DeathNote
         private void Update()
         {
             if (veMain.style.display == DisplayStyle.Flex && Keyboard.current.escapeKey.wasPressedThisFrame) { HideUI(); }
+            if (showingUI)
+            {
+                UnityEngine.Cursor.lockState = CursorLockMode.None;
+                UnityEngine.Cursor.visible = true;
+                StartOfRound.Instance.localPlayerUsingController = false;
+                IngamePlayerSettings.Instance.playerInput.DeactivateInput();
+                StartOfRound.Instance.localPlayerController.disableLookInput = true;
+            }
         }
 
         public void ShowUI()
         {
             logger.LogDebug("Showing UI");
+            showingUI = true;
             veMain.style.display = DisplayStyle.Flex;
 
             if (DeathController.ShinigamiEyesActivated == true) { btnActivateEyes.style.display = DisplayStyle.None; }
@@ -184,6 +194,7 @@ namespace DeathNote
         public void HideUI()
         {
             logger.LogDebug("Hiding UI");
+            showingUI = false;
             veMain.style.display = DisplayStyle.None;
 
             UnityEngine.Cursor.lockState = CursorLockMode.Locked;
