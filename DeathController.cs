@@ -59,7 +59,7 @@ namespace DeathNote
         // 1 = decapitation
         // 2 = coilhead decapitation
         // 3 = seizure
-        // 4 = disapearance
+        // 4 = disapearance // was masked
         // 5 = mask
         // 6 = burn
 
@@ -121,6 +121,11 @@ namespace DeathNote
 
             logger.LogDebug($"Got cause of death: {_causeOfDeath}");
             return _causeOfDeath;
+        }
+
+        public void KillWithDeathType(CauseOfDeath causeOfDeath, int time) // TODO: Set up timer
+        {
+            logger.LogDebug("In KillWithDeathType");
         }
 
         public IEnumerator StartKillTimerCoroutine()

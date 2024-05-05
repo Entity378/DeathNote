@@ -43,6 +43,9 @@ namespace DeathNote
         public static ConfigEntry<bool> configShowUnkillableEnemyNames;
         public static ConfigEntry<bool> configLockUI;
 
+        public static ConfigEntry<bool> configKillWithDeathType;
+        public static ConfigEntry<int> configTimeToKillWithDeathType;
+
         //public static ConfigEntry<string> configCustomNames;
 
         private void Awake()
@@ -70,6 +73,8 @@ namespace DeathNote
             
             configShowUnkillableEnemyNames = Config.Bind("Experimental", "Show Unkillable Enemy Names", false, "Allows you to see the names of enemies that are immortal. WARNING: Killing them can break things or cause bugs.");
             configLockUI = Config.Bind("Experimental", "Lock UI", false, "Locks the UI when showing it which should help with renabling input when pressing certain keybinds.");
+            configKillWithDeathType = Config.Bind("Experimental", "Kill With Death Type", false, "If this is true, killing a player with certain death types will attempt to kill them with whatever monster or hazard that kills them that way before the time limit.\nIf this fails, it will kill them the normal way.");
+            configTimeToKillWithDeathType = Config.Bind("Experimental", "Time To Kill With Death Type", 120, "Time in seconds to kill with death type before killing them normally.");
 
             // Loading assets
             string sAssemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
